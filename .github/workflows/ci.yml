@@ -1,0 +1,133 @@
+name: quality-and-pages
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Python ${{ matrix.python-version }} quality
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Check formatting boundaries
+        run: git diff --check
+
+      - name: Compile application and tests
+        run: python -m compileall -q app tests
+
+      - name: Run offline test suite
+        run: python -m unittest discover -s tests -v
+
+      - name: Generate synthetic review package
+        run: python -m app.cli demo --out /tmp/awam-demo
+
+      - name: Verify synthetic package has required artifacts
+        run: |
+          test -s /tmp/awam-demo/index.html
+          test -s /tmp/awam-demo/run.json
+          test -s /tmp/awam-demo/manifest.json
+          test -s /tmp/awam-demo/results.csv
+
+      - name: Verify production approval gate remains fail-closed
+        shell: bash
+        run: |
+          set +e
+          python -m app.cli validate --mode production
+          status=$?
+          set -e
+          test "$status" -eq 2
+
+      - name: Reject licensed or confidential data patterns
+        shell: bash
+        run: |
+          if find . -type f \( -name '*.zolca' -o -name '*.ecospold*' -o -name '*.spold' -o -name '*.sqlite' -o -name '*.db' \) -not -path './.git/*' | grep -q .; then
+            echo 'Forbidden licensed/database artifact detected.'
+            exit 1
+          fi
+
+  docker:
+    name: Docker build and smoke test
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build --tag awam-prospective-lca-workbench:${{ github.sha }} .
+
+      - name: Start container
+        run: docker run --detach --name awam-lca --publish 8765:8765 awam-prospective-lca-workbench:${{ github.sha }}
+
+      - name: HTTP smoke test
+        shell: bash
+        run: |
+          for attempt in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8765/ | grep -q 'Synthetic demonstration'; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs awam-lca
+          exit 1
+
+      - name: Stop container
+        if: always()
+        run: docker rm --force awam-lca || true
+
+  pages:
+    name: Deploy synthetic report to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [quality, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Generate Pages artifact
+        run: python -m app.cli demo --out _site
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
