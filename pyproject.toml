@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "awam-prospective-lca-workbench"
+version = "0.1.0"
+description = "Local-first, auditable prospective-LCA orchestration workbench"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE-or-INTERNAL-USE-NOTICE.md" }
+authors = [{ name = "Eren Ozturk" }]
+dependencies = []
+
+[project.scripts]
+awam-lca = "app.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
