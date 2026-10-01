@@ -2,6 +2,12 @@
 
 A local-first, auditable companion for prospective life-cycle assessment work. It is designed to sit around established tools such as openLCA, ecoinvent, Brightway, and premise rather than replace them.
 
+**Review the prototype:** [Live synthetic demo](https://hostilian.github.io/prospective-lca/) · [CI and Docker verification](https://github.com/Hostilian/prospective-lca/actions/workflows/ci.yml) · [Two-minute walkthrough](docs/demo_script.md)
+
+This is a discussion prototype for Fraunhofer Portugal AWAM. Its winery example and impact factors are synthetic. It is ready to demonstrate the workflow, but no real AWAM model has been connected or scientifically validated.
+
+For a quick review, open the demo, inspect its scenario comparison and assumption ledger, then read [the questions for a real pilot](docs/mara_requirements_questions.md) and [the known limitations](KNOWN_LIMITATIONS.md).
+
 The repository currently contains a complete offline vertical slice:
 
 - a typed, serializable project model;
