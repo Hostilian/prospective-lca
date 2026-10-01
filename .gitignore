@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.env
+.DS_Store
+.codex/
+*.zip
+
+# Generated review packages are reproducible build outputs.
+exports/*
+!exports/.gitkeep
+_site/
+
+# Never commit licensed, confidential, or generated study data.
+*.zolca
+*.ecospold*
+*.spold
+*.sqlite
+*.db
+data/private/
+data/licensed/
