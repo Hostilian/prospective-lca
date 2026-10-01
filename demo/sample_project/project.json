@@ -1,0 +1,331 @@
+{
+  "id": "synthetic-winery-pomace-2026",
+  "name": "Synthetic winery pomace valorisation",
+  "description": "A deliberately small, original inventory showing how foreground improvements and a changing electricity background can be compared across future scenarios.",
+  "synthetic_only": true,
+  "baseline_scenario_id": "baseline-2025",
+  "study": {
+    "goal": "Demonstrate an auditable prospective-LCA workflow for a future-oriented process comparison.",
+    "functional_unit": "1 tonne wet grape pomace processed",
+    "reference_flow": "1 tonne wet grape pomace entering the illustrative valorisation process",
+    "system_boundary": "Illustrative gate-to-gate conversion plus electricity, process heat, water, enzyme, transport, and an avoided fertiliser credit.",
+    "geography": "PT",
+    "baseline_year": 2025,
+    "target_years": [2030, 2040],
+    "impact_method": "Illustrative climate, water-use, and primary-energy proxies; not an approved LCIA method.",
+    "modelling_type": "Attributional demonstration; scientific choice unresolved for a real pilot."
+  },
+  "impact_categories": {
+    "climate_change_kg_co2e": {
+      "label": "Climate-change proxy",
+      "unit": "kg CO2e / FU"
+    },
+    "water_consumption_m3": {
+      "label": "Water-use proxy",
+      "unit": "m3 / FU"
+    },
+    "cumulative_energy_mj": {
+      "label": "Primary-energy proxy",
+      "unit": "MJ / FU"
+    }
+  },
+  "choices": [
+    {
+      "id": "choice-goal",
+      "category": "goal/scope",
+      "statement": "The comparison is a workflow demonstration, not a decision study.",
+      "value": "demonstration",
+      "source": "Synthetic demonstration design note",
+      "rationale": "Keeps the demo useful without implying an AWAM decision context.",
+      "status": "proposed",
+      "author": "Eren Ozturk",
+      "critical": true
+    },
+    {
+      "id": "choice-functional-unit",
+      "category": "goal/scope",
+      "statement": "Functional unit",
+      "value": "1 tonne wet grape pomace processed",
+      "unit": "t",
+      "source": "Synthetic demonstration design note",
+      "rationale": "Simple process-input reference flow for a reproducible example.",
+      "status": "proposed",
+      "author": "Eren Ozturk",
+      "critical": true
+    },
+    {
+      "id": "choice-boundary",
+      "category": "goal/scope",
+      "statement": "System boundary",
+      "value": "Gate-to-gate conversion plus selected background services",
+      "source": "Synthetic demonstration design note",
+      "rationale": "Intentionally narrow so the offline adapter stays readable.",
+      "status": "proposed",
+      "author": "Eren Ozturk",
+      "critical": true
+    },
+    {
+      "id": "choice-modelling-type",
+      "category": "goal/scope",
+      "statement": "Modelling type",
+      "value": "Attributional demonstration",
+      "source": "Synthetic demonstration design note",
+      "rationale": "No consequential market substitution is claimed.",
+      "status": "proposed",
+      "author": "Eren Ozturk",
+      "critical": true
+    },
+    {
+      "id": "choice-background",
+      "category": "background",
+      "statement": "Background electricity changes by pathway and target year.",
+      "value": "Scenario-defined illustrative factors",
+      "source": "Synthetic demonstration design note",
+      "rationale": "Shows temporal consistency controls without bundling a database.",
+      "status": "proposed",
+      "author": "Eren Ozturk",
+      "critical": true
+    },
+    {
+      "id": "choice-scale-up",
+      "category": "scale-up",
+      "statement": "Technology scale-up",
+      "value": "Simple multiplicative engineering assumptions",
+      "source": "Synthetic demonstration design note",
+      "rationale": "The real pilot must replace these with evidence and review.",
+      "status": "proposed",
+      "author": "Eren Ozturk",
+      "critical": true
+    },
+    {
+      "id": "choice-allocation",
+      "category": "allocation",
+      "statement": "Avoided fertiliser credit",
+      "value": "Illustrative credit; treatment must be approved for a real study",
+      "source": "Synthetic demonstration design note",
+      "rationale": "Makes the credit visible as an assumption rather than hiding it in a total.",
+      "status": "proposed",
+      "author": "Eren Ozturk",
+      "critical": true
+    },
+    {
+      "id": "choice-lcia",
+      "category": "impact method",
+      "statement": "Impact factors",
+      "value": "Original illustrative proxies",
+      "source": "Synthetic demonstration design note",
+      "rationale": "Avoids presenting demo arithmetic as a validated LCIA result.",
+      "status": "proposed",
+      "author": "Eren Ozturk",
+      "critical": true
+    }
+  ],
+  "inventory": [
+    {
+      "id": "electricity_grid",
+      "name": "Grid electricity",
+      "stage": "Electricity supply",
+      "layer": "background",
+      "quantity": 420.0,
+      "unit": "kWh",
+      "factors": {
+        "climate_change_kg_co2e": 0.42,
+        "water_consumption_m3": 0.0015,
+        "cumulative_energy_mj": 3.6
+      },
+      "source": "Original synthetic factor set; illustrative only",
+      "notes": "Scenario transformations change factors to represent a conditional future background."
+    },
+    {
+      "id": "process_heat",
+      "name": "Process heat",
+      "stage": "Thermal conversion",
+      "layer": "background",
+      "quantity": 180.0,
+      "unit": "kWh",
+      "factors": {
+        "climate_change_kg_co2e": 0.25,
+        "water_consumption_m3": 0.0008,
+        "cumulative_energy_mj": 3.6
+      },
+      "source": "Original synthetic factor set; illustrative only"
+    },
+    {
+      "id": "process_water",
+      "name": "Process water",
+      "stage": "Process operation",
+      "layer": "foreground",
+      "quantity": 2.8,
+      "unit": "m3",
+      "factors": {
+        "climate_change_kg_co2e": 0.0003,
+        "water_consumption_m3": 1.0,
+        "cumulative_energy_mj": 0.1
+      },
+      "source": "Original synthetic factor set; illustrative only"
+    },
+    {
+      "id": "enzymes",
+      "name": "Enzyme preparation",
+      "stage": "Process operation",
+      "layer": "foreground",
+      "quantity": 1.2,
+      "unit": "kg",
+      "factors": {
+        "climate_change_kg_co2e": 2.4,
+        "water_consumption_m3": 0.02,
+        "cumulative_energy_mj": 18.0
+      },
+      "source": "Original synthetic factor set; illustrative only"
+    },
+    {
+      "id": "feedstock_transport",
+      "name": "Feedstock transport",
+      "stage": "Transport",
+      "layer": "background",
+      "quantity": 180.0,
+      "unit": "t*km",
+      "factors": {
+        "climate_change_kg_co2e": 0.08,
+        "water_consumption_m3": 0.0,
+        "cumulative_energy_mj": 1.2
+      },
+      "source": "Original synthetic factor set; illustrative only"
+    },
+    {
+      "id": "avoided_fertiliser",
+      "name": "Avoided mineral fertiliser credit",
+      "stage": "Resource recovery credit",
+      "layer": "foreground",
+      "quantity": -0.35,
+      "unit": "t",
+      "factors": {
+        "climate_change_kg_co2e": 50.0,
+        "water_consumption_m3": 3.0,
+        "cumulative_energy_mj": 100.0
+      },
+      "source": "Original synthetic credit; illustrative only",
+      "is_credit": true,
+      "notes": "Credit treatment is a scientific decision gate in any real pilot."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "baseline-2025",
+      "name": "Baseline reference",
+      "year": 2025,
+      "pathway": "observed-baseline",
+      "geography": "PT",
+      "foreground_id": "foreground-demo-2025",
+      "background_id": "background-demo-2025",
+      "background_year": 2025,
+      "background_pathway": "observed-baseline",
+      "narrative": "Illustrative reference case using the original synthetic inventory values.",
+      "tags": ["baseline", "reference"],
+      "assumption_ids": ["choice-goal", "choice-functional-unit", "choice-boundary", "choice-lcia"]
+    },
+    {
+      "id": "central-2030",
+      "name": "Central pathway 2030",
+      "year": 2030,
+      "pathway": "central",
+      "geography": "PT",
+      "foreground_id": "foreground-demo-2030-central",
+      "background_id": "background-demo-2030-central",
+      "background_year": 2030,
+      "background_pathway": "central",
+      "narrative": "Conditional 2030 case with moderate process efficiency gains and a cleaner electricity background.",
+      "tags": ["future", "central"],
+      "assumption_ids": ["choice-background", "choice-scale-up", "choice-allocation"],
+      "transformations": [
+        {"id": "central-2030-electricity-quantity", "scenario_id": "central-2030", "operation": "scale_quantity", "target": "electricity_grid:quantity", "value": 0.82, "unit": "kWh", "formula": "quantity × 0.82", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative efficiency improvement", "approval_state": "proposed"},
+        {"id": "central-2030-electricity-climate", "scenario_id": "central-2030", "operation": "set_factor", "target": "electricity_grid:climate_change_kg_co2e", "value": 0.24, "unit": "unit", "formula": "set to 0.24 kg CO2e/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative background change", "approval_state": "proposed"},
+        {"id": "central-2030-electricity-water", "scenario_id": "central-2030", "operation": "set_factor", "target": "electricity_grid:water_consumption_m3", "value": 0.001, "unit": "unit", "formula": "set to 0.001 m3/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative background change", "approval_state": "proposed"},
+        {"id": "central-2030-heat", "scenario_id": "central-2030", "operation": "scale_quantity", "target": "process_heat:quantity", "value": 0.85, "unit": "kWh", "formula": "quantity × 0.85", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative thermal-efficiency improvement", "approval_state": "proposed"},
+        {"id": "central-2030-water", "scenario_id": "central-2030", "operation": "scale_quantity", "target": "process_water:quantity", "value": 0.9, "unit": "m3", "formula": "quantity × 0.90", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative water-reuse improvement", "approval_state": "proposed"},
+        {"id": "central-2030-enzyme", "scenario_id": "central-2030", "operation": "scale_quantity", "target": "enzymes:quantity", "value": 0.9, "unit": "kg", "formula": "quantity × 0.90", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative dose optimisation", "approval_state": "proposed"},
+        {"id": "central-2030-transport", "scenario_id": "central-2030", "operation": "scale_quantity", "target": "feedstock_transport:quantity", "value": 0.88, "unit": "t*km", "formula": "quantity × 0.88", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative logistics optimisation", "approval_state": "proposed"},
+        {"id": "central-2030-credit", "scenario_id": "central-2030", "operation": "scale_quantity", "target": "avoided_fertiliser:quantity", "value": 1.2, "unit": "t", "formula": "credit quantity × 1.20", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative recovery improvement", "approval_state": "proposed"}
+      ]
+    },
+    {
+      "id": "conservative-2030",
+      "name": "Conservative pathway 2030",
+      "year": 2030,
+      "pathway": "conservative",
+      "geography": "PT",
+      "foreground_id": "foreground-demo-2030-conservative",
+      "background_id": "background-demo-2030-conservative",
+      "background_year": 2030,
+      "background_pathway": "conservative",
+      "narrative": "Conditional 2030 case with limited foreground improvement and a modest electricity-background change.",
+      "tags": ["future", "conservative"],
+      "assumption_ids": ["choice-background", "choice-scale-up", "choice-allocation"],
+      "transformations": [
+        {"id": "conservative-2030-electricity-quantity", "scenario_id": "conservative-2030", "operation": "scale_quantity", "target": "electricity_grid:quantity", "value": 0.95, "unit": "kWh", "formula": "quantity × 0.95", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative modest efficiency improvement", "approval_state": "proposed"},
+        {"id": "conservative-2030-electricity-climate", "scenario_id": "conservative-2030", "operation": "set_factor", "target": "electricity_grid:climate_change_kg_co2e", "value": 0.32, "unit": "unit", "formula": "set to 0.32 kg CO2e/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative background change", "approval_state": "proposed"},
+        {"id": "conservative-2030-electricity-water", "scenario_id": "conservative-2030", "operation": "set_factor", "target": "electricity_grid:water_consumption_m3", "value": 0.0013, "unit": "unit", "formula": "set to 0.0013 m3/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative background change", "approval_state": "proposed"},
+        {"id": "conservative-2030-heat", "scenario_id": "conservative-2030", "operation": "scale_quantity", "target": "process_heat:quantity", "value": 0.92, "unit": "kWh", "formula": "quantity × 0.92", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative thermal-efficiency improvement", "approval_state": "proposed"},
+        {"id": "conservative-2030-water", "scenario_id": "conservative-2030", "operation": "scale_quantity", "target": "process_water:quantity", "value": 0.95, "unit": "m3", "formula": "quantity × 0.95", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative water-reuse improvement", "approval_state": "proposed"},
+        {"id": "conservative-2030-enzyme", "scenario_id": "conservative-2030", "operation": "scale_quantity", "target": "enzymes:quantity", "value": 0.98, "unit": "kg", "formula": "quantity × 0.98", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative dose optimisation", "approval_state": "proposed"},
+        {"id": "conservative-2030-transport", "scenario_id": "conservative-2030", "operation": "scale_quantity", "target": "feedstock_transport:quantity", "value": 0.9, "unit": "t*km", "formula": "quantity × 0.90", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative logistics optimisation", "approval_state": "proposed"},
+        {"id": "conservative-2030-credit", "scenario_id": "conservative-2030", "operation": "scale_quantity", "target": "avoided_fertiliser:quantity", "value": 1.05, "unit": "t", "formula": "credit quantity × 1.05", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative recovery improvement", "approval_state": "proposed"}
+      ]
+    },
+    {
+      "id": "conservative-2040",
+      "name": "Conservative pathway 2040",
+      "year": 2040,
+      "pathway": "conservative",
+      "geography": "PT",
+      "foreground_id": "foreground-demo-2040-conservative",
+      "background_id": "background-demo-2040-conservative",
+      "background_year": 2040,
+      "background_pathway": "conservative",
+      "narrative": "Conditional 2040 case with cautious technology learning and moderate background decarbonisation.",
+      "tags": ["future", "conservative"],
+      "assumption_ids": ["choice-background", "choice-scale-up", "choice-allocation"],
+      "transformations": [
+        {"id": "conservative-2040-electricity-quantity", "scenario_id": "conservative-2040", "operation": "scale_quantity", "target": "electricity_grid:quantity", "value": 0.8, "unit": "kWh", "formula": "quantity × 0.80", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative efficiency improvement", "approval_state": "proposed"},
+        {"id": "conservative-2040-electricity-climate", "scenario_id": "conservative-2040", "operation": "set_factor", "target": "electricity_grid:climate_change_kg_co2e", "value": 0.3, "unit": "unit", "formula": "set to 0.30 kg CO2e/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative background change", "approval_state": "proposed"},
+        {"id": "conservative-2040-electricity-water", "scenario_id": "conservative-2040", "operation": "set_factor", "target": "electricity_grid:water_consumption_m3", "value": 0.0012, "unit": "unit", "formula": "set to 0.0012 m3/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative background change", "approval_state": "proposed"},
+        {"id": "conservative-2040-heat", "scenario_id": "conservative-2040", "operation": "scale_quantity", "target": "process_heat:quantity", "value": 0.8, "unit": "kWh", "formula": "quantity × 0.80", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative thermal-efficiency improvement", "approval_state": "proposed"},
+        {"id": "conservative-2040-water", "scenario_id": "conservative-2040", "operation": "scale_quantity", "target": "process_water:quantity", "value": 0.9, "unit": "m3", "formula": "quantity × 0.90", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative water-reuse improvement", "approval_state": "proposed"},
+        {"id": "conservative-2040-enzyme", "scenario_id": "conservative-2040", "operation": "scale_quantity", "target": "enzymes:quantity", "value": 0.9, "unit": "kg", "formula": "quantity × 0.90", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative dose optimisation", "approval_state": "proposed"},
+        {"id": "conservative-2040-transport", "scenario_id": "conservative-2040", "operation": "scale_quantity", "target": "feedstock_transport:quantity", "value": 0.82, "unit": "t*km", "formula": "quantity × 0.82", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative logistics optimisation", "approval_state": "proposed"},
+        {"id": "conservative-2040-credit", "scenario_id": "conservative-2040", "operation": "scale_quantity", "target": "avoided_fertiliser:quantity", "value": 1.2, "unit": "t", "formula": "credit quantity × 1.20", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative recovery improvement", "approval_state": "proposed"}
+      ]
+    },
+    {
+      "id": "ambitious-2040",
+      "name": "Ambitious pathway 2040",
+      "year": 2040,
+      "pathway": "ambitious",
+      "geography": "PT",
+      "foreground_id": "foreground-demo-2040-ambitious",
+      "background_id": "background-demo-2040-ambitious",
+      "background_year": 2040,
+      "background_pathway": "ambitious",
+      "narrative": "Conditional 2040 case with stronger efficiency, recovery, and background decarbonisation assumptions.",
+      "tags": ["future", "ambitious"],
+      "assumption_ids": ["choice-background", "choice-scale-up", "choice-allocation"],
+      "transformations": [
+        {"id": "ambitious-2040-electricity-quantity", "scenario_id": "ambitious-2040", "operation": "scale_quantity", "target": "electricity_grid:quantity", "value": 0.6, "unit": "kWh", "formula": "quantity × 0.60", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative high-efficiency improvement", "approval_state": "proposed"},
+        {"id": "ambitious-2040-electricity-climate", "scenario_id": "ambitious-2040", "operation": "set_factor", "target": "electricity_grid:climate_change_kg_co2e", "value": 0.12, "unit": "unit", "formula": "set to 0.12 kg CO2e/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative background change", "approval_state": "proposed"},
+        {"id": "ambitious-2040-electricity-water", "scenario_id": "ambitious-2040", "operation": "set_factor", "target": "electricity_grid:water_consumption_m3", "value": 0.0007, "unit": "unit", "formula": "set to 0.0007 m3/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative background change", "approval_state": "proposed"},
+        {"id": "ambitious-2040-heat", "scenario_id": "ambitious-2040", "operation": "scale_quantity", "target": "process_heat:quantity", "value": 0.65, "unit": "kWh", "formula": "quantity × 0.65", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative thermal-efficiency improvement", "approval_state": "proposed"},
+        {"id": "ambitious-2040-heat-factor", "scenario_id": "ambitious-2040", "operation": "set_factor", "target": "process_heat:climate_change_kg_co2e", "value": 0.18, "unit": "unit", "formula": "set to 0.18 kg CO2e/kWh", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative heat-source change", "approval_state": "proposed"},
+        {"id": "ambitious-2040-water", "scenario_id": "ambitious-2040", "operation": "scale_quantity", "target": "process_water:quantity", "value": 0.75, "unit": "m3", "formula": "quantity × 0.75", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative water-reuse improvement", "approval_state": "proposed"},
+        {"id": "ambitious-2040-enzyme", "scenario_id": "ambitious-2040", "operation": "scale_quantity", "target": "enzymes:quantity", "value": 0.8, "unit": "kg", "formula": "quantity × 0.80", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative dose optimisation", "approval_state": "proposed"},
+        {"id": "ambitious-2040-transport", "scenario_id": "ambitious-2040", "operation": "scale_quantity", "target": "feedstock_transport:quantity", "value": 0.75, "unit": "t*km", "formula": "quantity × 0.75", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative logistics optimisation", "approval_state": "proposed"},
+        {"id": "ambitious-2040-credit", "scenario_id": "ambitious-2040", "operation": "scale_quantity", "target": "avoided_fertiliser:quantity", "value": 1.45, "unit": "t", "formula": "credit quantity × 1.45", "evidence_source": "Synthetic pathway assumption", "rationale": "Illustrative recovery improvement", "approval_state": "proposed"}
+      ]
+    }
+  ],
+  "metadata": {
+    "owner": "AWAM scientific owner to be confirmed",
+    "developer": "Eren Ozturk",
+    "license": "Original synthetic data; project code intended for supervised pilot review",
+    "created_for": "Fraunhofer Portugal AWAM prospective-LCA discussion"
+  }
+}
