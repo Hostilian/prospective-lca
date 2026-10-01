@@ -1,0 +1,13 @@
+services:
+  awam-lca:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: awam-prospective-lca-workbench:local
+    ports:
+      - "8765:8765"
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
