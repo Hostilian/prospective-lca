@@ -9,6 +9,7 @@ and unit mappings before connecting licensed data.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 
 
 class UnitError(ValueError):
@@ -72,6 +73,7 @@ def assert_quantity(value: float, unit: str, *, allow_negative: bool = False) ->
     normalize_unit(unit)
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         raise UnitError(f"Quantity must be numeric, got {value!r}")
+    if not isfinite(value):
+        raise UnitError(f"Quantity must be finite, got {value!r}")
     if not allow_negative and value < 0:
         raise UnitError(f"Quantity must be non-negative, got {value}")
-
