@@ -38,3 +38,14 @@ class EngineTests(unittest.TestCase):
         second = run_project(self.project, mode="demo", selected_scenario_ids=self.scenarios)
         self.assertNotEqual(sha256_json(first["results"]), sha256_json(second["results"]))
 
+    def test_set_quantity_converts_to_inventory_unit(self):
+        transformation = self.project.scenarios[1].transformations[0]
+        transformation.operation = "set_quantity"
+        transformation.value = 3600
+        transformation.unit = "MJ"
+        run = run_project(self.project, mode="demo", selected_scenario_ids=["baseline-2025", "central-2030"])
+        electricity = next(c for c in run["results"][1]["contributions"] if c["item_id"] == "electricity_grid")
+        self.assertEqual(electricity["unit"], "kWh")
+        self.assertEqual(electricity["quantity"], 1000)
+        self.assertEqual(run["transformation_diffs"]["central-2030"][0]["after"], 1000)
+        self.assertEqual(run["transformation_diffs"]["central-2030"][0]["result_unit"], "kWh")
