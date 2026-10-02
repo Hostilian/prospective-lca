@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "awam-prospective-lca-workbench"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local-first, auditable prospective-LCA orchestration workbench"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -24,4 +24,3 @@ target-version = "py311"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
