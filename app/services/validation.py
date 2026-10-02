@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from app.domain.models import ApprovalState, Project, Scenario
-from app.domain.units import UnitError, assert_quantity, compatible
+from app.domain.units import UnitError, assert_quantity, compatible, normalize_unit
 
 
 @dataclass
@@ -90,6 +90,13 @@ def validate_project(project: Project, *, mode: str = "demo", selected_scenario_
     if len(scenarios) != len(project.scenarios):
         _issue(report, "DUPLICATE_SCENARIO_ID", "error", "Scenario IDs must be unique.", "scenarios", "Rename duplicate scenario IDs before running.")
 
+    if len(inventory) != len(project.inventory):
+        _issue(report, "DUPLICATE_INVENTORY_ID", "error", "Inventory item IDs must be unique.", "inventory", "Give each inventory item a unique ID.")
+    if not project.impact_categories:
+        _issue(report, "MISSING_IMPACT_CATEGORIES", "error", "At least one impact category is required.", "impact_categories", "Define the categories used by the inventory factors.")
+    if len(selected) != len(set(selected)):
+        _issue(report, "DUPLICATE_SELECTED_SCENARIO", "error", "A scenario was selected more than once.", "selected_scenarios", "Select each scenario only once.")
+
     choice_ids = {choice.id for choice in project.choices}
     if len(choice_ids) != len(project.choices):
         _issue(report, "DUPLICATE_CHOICE_ID", "error", "Assumption/choice IDs must be unique.", "choices", "Give each assumption a stable unique ID.")
@@ -115,6 +122,8 @@ def validate_project(project: Project, *, mode: str = "demo", selected_scenario_
 
         seen_transformations: set[str] = set()
         for transformation in scenario.transformations:
+            if transformation.scenario_id != scenario.id:
+                _issue(report, "TRANSFORMATION_SCENARIO_MISMATCH", "error", f"Transformation {transformation.id!r} belongs to another scenario.", f"scenarios.{scenario.id}.transformations", "Set scenario_id to the containing scenario ID.")
             if transformation.id in seen_transformations:
                 _issue(report, "DUPLICATE_TRANSFORMATION_ID", "error", f"Transformation ID {transformation.id!r} is duplicated within the scenario.", f"scenarios.{scenario.id}.transformations", "Use a unique stable transformation ID.")
             seen_transformations.add(transformation.id)
@@ -126,9 +135,18 @@ def validate_project(project: Project, *, mode: str = "demo", selected_scenario_
             item = inventory[item_id]
             try:
                 if transformation.operation in {"scale_quantity", "set_quantity"}:
+                    if len(target_parts) != 2 or target_parts[1] != "quantity":
+                        _issue(report, "INVALID_QUANTITY_TARGET", "error", f"Quantity target {transformation.target!r} must end in ':quantity'.", f"transformations.{transformation.id}.target", "Use item_id:quantity.")
                     if transformation.unit and not compatible(transformation.unit, item.unit):
-                        _issue(report, "UNIT_INCOMPATIBLE", "error", f"{transformation.unit} cannot be applied to {item.unit}.", f"transformations.{transformation.id}.unit", "Use a compatible unit or document a conversion before execution.")
-                    assert_quantity(transformation.value, transformation.unit or item.unit, allow_negative=False)
+                        _issue(report, "UNIT_INCOMPATIBLE", "error", f"{transformation.unit} cannot be applied to {item.unit}.", f"transformations.{transformation.id}.unit", "Use a compatible unit.")
+                    if transformation.operation == "scale_quantity":
+                        # The value is a dimensionless multiplier. Its optional unit
+                        # labels the affected flow and must not imply conversion.
+                        if transformation.unit and normalize_unit(transformation.unit) != normalize_unit(item.unit):
+                            _issue(report, "SCALE_UNIT_MISMATCH", "error", f"Scale multiplier for {item.id!r} cannot relabel {item.unit} as {transformation.unit}.", f"transformations.{transformation.id}.unit", "Use the inventory unit or omit the unit for a dimensionless multiplier.")
+                        assert_quantity(transformation.value, "unit")
+                    else:
+                        assert_quantity(transformation.value, transformation.unit or item.unit, allow_negative=item.is_credit)
                 elif transformation.operation in {"scale_factor", "set_factor"}:
                     if len(target_parts) != 2 or target_parts[1] not in item.factors:
                         _issue(report, "UNKNOWN_FACTOR_TARGET", "error", f"Transformation factor target {transformation.target!r} is not defined.", f"transformations.{transformation.id}.target", "Use item_id:impact_category from the inventory.")
@@ -157,5 +175,13 @@ def validate_project(project: Project, *, mode: str = "demo", selected_scenario_
             _issue(report, "INVALID_INVENTORY_QUANTITY", "error", str(exc), f"inventory.{item.id}", "Correct the inventory quantity/unit.")
         if not item.source:
             _issue(report, "MISSING_INVENTORY_SOURCE", "error" if mode == "production" else "warning", f"Inventory item {item.id} has no source note.", f"inventory.{item.id}.source", "Add a measurement, literature source, or synthetic-data declaration.")
+        for category in project.impact_categories:
+            if category not in item.factors:
+                _issue(report, "MISSING_FACTOR", "error", f"Inventory item {item.id!r} has no factor for {category!r}.", f"inventory.{item.id}.factors", "Provide an explicit factor or remove the category from the study.")
+            else:
+                try:
+                    assert_quantity(item.factors[category], "unit", allow_negative=True)
+                except UnitError as exc:
+                    _issue(report, "INVALID_FACTOR", "error", str(exc), f"inventory.{item.id}.factors.{category}", "Use a finite numeric factor.")
 
     return report
