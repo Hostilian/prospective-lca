@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from app.domain.models import InventoryItem, Project, Scenario
+from app.domain.units import convert
 from app.services.validation import ValidationReport, validate_project
 
 
@@ -63,7 +64,7 @@ def _factor_for(item: InventoryItem, category: str) -> float:
     return float(item.factors.get(category, 0.0))
 
 
-def _apply_transformations(scenario: Scenario, quantities: dict[str, float], factors: dict[str, dict[str, float]]) -> list[dict[str, Any]]:
+def _apply_transformations(scenario: Scenario, quantities: dict[str, float], factors: dict[str, dict[str, float]], item_units: dict[str, str]) -> list[dict[str, Any]]:
     diff: list[dict[str, Any]] = []
     for transformation in scenario.transformations:
         target_parts = transformation.target.split(":", 1)
@@ -74,7 +75,8 @@ def _apply_transformations(scenario: Scenario, quantities: dict[str, float], fac
             after = quantities[item_id]
         elif transformation.operation == "set_quantity":
             before = quantities[item_id]
-            quantities[item_id] = transformation.value
+            target_unit = item_units[item_id]
+            quantities[item_id] = convert(transformation.value, transformation.unit or target_unit, target_unit)
             after = quantities[item_id]
         elif transformation.operation == "scale_factor":
             category = target_parts[1]
@@ -93,6 +95,9 @@ def _apply_transformations(scenario: Scenario, quantities: dict[str, float], fac
             "scenario_id": scenario.id,
             "operation": transformation.operation,
             "target": transformation.target,
+            "input_value": transformation.value,
+            "input_unit": transformation.unit,
+            "result_unit": item_units[item_id] if transformation.operation.endswith("quantity") else None,
             "before": before,
             "after": after,
             "formula": transformation.formula,
@@ -107,7 +112,7 @@ def calculate_scenario(project: Project, scenario: Scenario) -> tuple[ScenarioRe
 
     quantities = {item.id: item.quantity for item in project.inventory}
     factors = {item.id: dict(item.factors) for item in project.inventory}
-    transformation_diff = _apply_transformations(scenario, quantities, factors)
+    transformation_diff = _apply_transformations(scenario, quantities, factors, {item.id: item.unit for item in project.inventory})
     impacts = {category: 0.0 for category in project.impact_categories}
     by_layer: dict[str, dict[str, float]] = {}
     by_stage: dict[str, dict[str, float]] = {}
@@ -170,4 +175,3 @@ def run_project(project: Project, *, mode: str = "demo", selected_scenario_ids: 
             "scientific_status": "illustrative synthetic calculation; not an LCIA result",
         },
     }
-
