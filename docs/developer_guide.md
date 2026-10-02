@@ -21,6 +21,10 @@ The runtime package uses the Python standard library in Phase 1. If an optional 
 - Add a contract test for every adapter and a golden test for every report shape.
 - Never add licensed data to fixtures.
 
+## Synthetic transformation units
+
+`set_quantity` takes a value in its declared unit and converts it to the inventory item's unit before calculation. Its diff records the input and result units. `scale_quantity` takes a dimensionless multiplier; an optional unit only labels the affected flow and must match the inventory unit. Inventory factors must be present and finite for every declared impact category. These rules are limited to the synthetic adapter and do not define openLCA flow mapping.
+
 ## OpenLCA next milestone
 
 After AWAM confirms the exact version and safe test database:
@@ -36,4 +40,3 @@ After AWAM confirms the exact version and safe test database:
 ## Premise/Brightway next milestone
 
 Only after license and route approval: pin premise/Brightway/ecoinvent/IAM versions, store checksums and metadata, generate two background scenarios, inspect change/validation reports, and prove compatibility with the chosen calculation route.
-
