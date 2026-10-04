@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Prospective life cycle assessment methodology preview for grape pomace valorisation in Portugal. Illustrative scenarios for 2030 and 2040.">
+<title>Pomace Valorisation — LCA Methodology Preview</title>
+<style>
+/* ── Design tokens ──────────────────────────────────────────────── */
+:root {
+  --ink:        #1a1a1a;
+  --ink-2:      #4a4a4a;
+  --ink-3:      #767676;
+  --rule:       #d4d4d4;
+  --surface:    #ffffff;
+  --surface-2:  #f5f5f4;
+  --surface-3:  #e8e8e6;
+  --accent:     #1d4ed8;
+  --accent-dim: #dbeafe;
+  --warn-bg:    #fef3c7;
+  --warn-ink:   #92400e;
+  --credit:     #0f766e;
+  --neg-1:      #1d4ed8;
+  --neg-2:      #ea580c;
+  --neg-3:      #0f766e;
+  --radius:     4px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --max-prose: 68ch;
+  --max-wide: 900px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink:        #e8e8e6;
+    --ink-2:      #a8a8a6;
+    --ink-3:      #767674;
+    --rule:       #3a3a38;
+    --surface:    #1c1c1a;
+    --surface-2:  #262624;
+    --surface-3:  #323230;
+    --accent:     #60a5fa;
+    --accent-dim: #1e3a5f;
+    --warn-bg:    #3d2800;
+    --warn-ink:   #fbbf24;
+    --credit:     #2dd4bf;
+    --neg-1:      #60a5fa;
+    --neg-2:      #fb923c;
+    --neg-3:      #2dd4bf;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body { font-family: var(--font); color: var(--ink); background: var(--surface); line-height: 1.6; }
+img, svg { display: block; max-width: 100%; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.page { max-width: var(--max-wide); margin: 0 auto; padding: 0 1.25rem; }
+
+/* ── Nav ── */
+nav#toc {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--surface); border-bottom: 1px solid var(--rule); padding: 0.5rem 0;
+}
+nav#toc .page { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+nav#toc a { font-size: 0.75rem; font-weight: 500; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
+nav#toc a:hover { color: var(--accent); }
+.toc-label {
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--ink-3); white-space: nowrap; margin-right: 0.5rem;
+}
+
+/* ── Status banner ── */
+.status-banner { background: var(--warn-bg); border-bottom: 1px solid var(--warn-ink); padding: 0.6rem 0; }
+.status-banner .page { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+.status-tag {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--warn-ink); border: 1px solid var(--warn-ink); border-radius: var(--radius);
+  padding: 0.15rem 0.4rem; white-space: nowrap;
+}
+.status-banner p { font-size: 0.8rem; color: var(--warn-ink); max-width: none; margin: 0; }
+
+/* ── Cover ── */
+#cover { padding: 3.5rem 0 2.5rem; border-bottom: 1px solid var(--rule); }
+.cover-eyebrow {
+  font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 0.75rem; max-width: none;
+}
+#cover h1 {
+  font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; line-height: 1.2;
+  max-width: 22ch; margin-bottom: 0.75rem;
+}
+#cover .subtitle { font-size: 1rem; color: var(--ink-2); max-width: var(--max-prose); margin-bottom: 1.5rem; }
+.meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; max-width: 600px; }
+.meta-item { font-size: 0.8rem; }
+.meta-item .label {
+  font-weight: 600; color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: 0.05em; font-size: 0.68rem; display: block; margin-bottom: 0.15rem;
+}
+
+/* ── Sections ── */
+section { padding: 2.5rem 0; border-bottom: 1px solid var(--rule); }
+section:last-of-type { border-bottom: none; }
+h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--ink); }
+h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; margin-top: 1.25rem; }
+h3:first-child { margin-top: 0; }
+p { max-width: var(--max-prose); margin-bottom: 0.75rem; }
+p:last-child { margin-bottom: 0; }
+ul, ol { max-width: var(--max-prose); padding-left: 1.25rem; margin-bottom: 0.75rem; }
+li { margin-bottom: 0.3rem; }
+
+/* ── Callout ── */
+.callout {
+  background: var(--surface-2); border-left: 3px solid var(--accent);
+  padding: 0.75rem 1rem; border-radius: 0 var(--radius) var(--radius) 0;
+  margin-bottom: 1rem; max-width: var(--max-prose);
+}
+.callout.warning { background: var(--warn-bg); border-color: var(--warn-ink); }
+.callout p { font-size: 0.875rem; margin-bottom: 0; max-width: none; }
+
+/* ── Boundary diagram ── */
+.boundary-wrap { margin: 1.25rem 0; overflow-x: auto; }
+
+/* ── Scenario cards ── */
+.scenario-list { display: flex; flex-direction: column; gap: 1rem; max-width: var(--max-wide); }
+.scenario-card {
+  background: var(--surface-2); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 1rem 1.25rem; display: grid; grid-template-columns: 130px 1fr;
+  gap: 0 1.25rem; align-items: start;
+}
+.scenario-card.baseline { border-left: 3px solid var(--accent); }
+.sc-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--ink-3); display: block; margin-bottom: 0.2rem;
+}
+.sc-name { font-size: 0.9rem; font-weight: 700; color: var(--ink); }
+.sc-year { font-size: 0.8rem; color: var(--ink-2); margin-top: 0.2rem; }
+.sc-narrative { font-size: 0.875rem; color: var(--ink-2); max-width: none; margin-bottom: 0; }
+
+/* ── Tables ── */
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { border-bottom: 2px solid var(--rule); }
+th {
+  text-align: left; font-weight: 600; font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--ink-3); padding: 0.5rem 0.75rem; white-space: nowrap;
+}
+th[data-unit]::after {
+  content: attr(data-unit); display: block; font-size: 0.65rem; font-weight: 400;
+  text-transform: none; letter-spacing: 0; color: var(--ink-3); margin-top: 0.1rem;
+}
+td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); color: var(--ink); }
+tr.baseline-row { background: var(--accent-dim); }
+tr.baseline-row td { font-weight: 600; }
+.delta { color: #15803d; font-size: 0.75rem; display: block; font-weight: 500; }
+.delta::before { content: "\25BC  "; font-size: 0.65rem; }
+@media (prefers-color-scheme: dark) { .delta { color: #4ade80; } }
+
+/* ── Charts ── */
+.chart-wrap {
+  margin: 1.25rem 0; background: var(--surface-2); border: 1px solid var(--rule);
+  border-radius: var(--radius); padding: 1.25rem; overflow-x: auto;
+}
+.chart-title { font-size: 0.8rem; font-weight: 600; color: var(--ink-2); margin-bottom: 0.75rem; display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center; }
+.legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: var(--ink-2); }
+.legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+.chart-note { font-size: 0.75rem; color: var(--ink-3); margin-top: 0.75rem; max-width: var(--max-prose); }
+
+/* ── Assumptions ── */
+.status-badge {
+  display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 0.15rem 0.4rem; border-radius: var(--radius); white-space: nowrap;
+}
+.status-proposed { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid #d97706; }
+.status-confirmed { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+@media (prefers-color-scheme: dark) {
+  .status-confirmed { background: #14532d; color: #86efac; border-color: #16a34a; }
+}
+
+/* ── Gap box ── */
+.gap-box {
+  background: var(--surface-2); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 1.25rem; margin: 1rem 0; max-width: var(--max-wide);
+}
+.gap-box h3 { font-size: 0.85rem; color: var(--ink-3); margin-bottom: 0.75rem; margin-top: 0; }
+.gap-box ol, .gap-box ul { font-size: 0.875rem; }
+
+/* ── Appendix ── */
+.appendix-item {
+  font-family: var(--mono); font-size: 0.72rem; color: var(--ink-2);
+  background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: var(--radius); word-break: break-all;
+}
+dl { max-width: var(--max-prose); }
+dt { font-weight: 600; margin-top: 0.75rem; }
+dd { margin-left: 1.25rem; font-size: 0.875rem; color: var(--ink-2); margin-bottom: 0.25rem; }
+
+/* ── Footer ── */
+footer { padding: 1.5rem 0; border-top: 1px solid var(--rule); font-size: 0.75rem; color: var(--ink-3); }
+footer p { max-width: var(--max-prose); margin-bottom: 0.3rem; }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .scenario-card { grid-template-columns: 1fr; }
+  nav#toc .page { gap: 0.5rem; }
+  nav#toc a { font-size: 0.7rem; }
+  .meta-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Print ── */
+@media print {
+  nav#toc, .status-banner { position: static; }
+  body { font-size: 10pt; color: #000; background: #fff; }
+  a { color: #000; text-decoration: none; }
+  section { page-break-inside: avoid; }
+  .chart-wrap { page-break-inside: avoid; }
+  table { page-break-inside: avoid; }
+  h2 { page-break-after: avoid; }
+  :root {
+    --ink: #000; --ink-2: #333; --ink-3: #666; --rule: #ccc;
+    --surface: #fff; --surface-2: #f5f5f5; --accent: #1a3a8f;
+    --accent-dim: #e5eaf9; --warn-bg: #fff8dc; --warn-ink: #7a4000;
+    --neg-1: #1a3a8f; --neg-2: #c04c00; --neg-3: #0b5e58; --credit: #0b5e58;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="status-banner" role="note" aria-label="Document status">
+  <div class="page">
+    <span class="status-tag">Illustrative</span>
+    <p>Synthetic demonstration — not for scientific or external decision-making. Numbers are computed from illustrative inputs; no LCIA method has been approved for this study.</p>
+  </div>
+</div>
+
+<nav id="toc" aria-label="Table of contents">
+  <div class="page">
+    <span class="toc-label">Contents</span>
+    <a href="#summary">Summary</a>
+    <a href="#scope">Scope</a>
+    <a href="#scenarios">Scenarios</a>
+    <a href="#results">Results</a>
+    <a href="#hotspot">Hotspot</a>
+    <a href="#decomposition">Drivers</a>
+    <a href="#assumptions">Assumptions</a>
+    <a href="#limitations">Limitations</a>
+    <a href="#nextsteps">Next steps</a>
+    <a href="#appendix">Appendix</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<section id="cover" aria-labelledby="doc-title">
+  <p class="cover-eyebrow">Prospective Life Cycle Assessment &mdash; Methodology Preview</p>
+  <h1 id="doc-title">Grape pomace valorisation: illustrative scenarios for 2030 and 2040</h1>
+  <p class="subtitle">This document shows how a prospective life cycle assessment (LCA) would be structured for an enzymatic pomace valorisation process in Portugal. The numbers are computed from illustrative, synthetic inputs and are labelled as such throughout. They demonstrate the method, not a validated result.</p>
+  <div class="meta-grid">
+    <div class="meta-item"><span class="label">Geography</span>Portugal (PT)</div>
+    <div class="meta-item"><span class="label">Baseline year</span>2025</div>
+    <div class="meta-item"><span class="label">Target years</span>2030 and 2040</div>
+    <div class="meta-item"><span class="label">Status</span>Illustrative draft</div>
+    <div class="meta-item"><span class="label">Version</span>0.1.1</div>
+    <div class="meta-item"><span class="label">Date</span>October 2026</div>
+    <div class="meta-item"><span class="label">Prepared by</span>[AUTHOR NAME]</div>
+    <div class="meta-item"><span class="label">Contact</span>[CONTACT EMAIL]</div>
+  </div>
+</section>
+
+<section id="summary" aria-labelledby="h-summary">
+  <h2 id="h-summary">Executive summary</h2>
+  <p>This preview shows the structure and logic of a prospective life cycle assessment for grape pomace valorisation in Portugal, using illustrative numbers in place of real site data. Under the illustrative assumptions, climate-related impacts from processing one tonne of wet pomace could fall between 25% and 82% compared with a 2025 reference case, depending on how aggressively the process is improved and how quickly Portugal&rsquo;s electricity grid decarbonises &mdash; but those figures are driven by synthetic inputs and must not be used for investment or policy decisions.</p>
+  <p>The dominant source of climate impact in the baseline is grid electricity, which contributes approximately 80% of the total. This means interventions that reduce electricity consumption or switch to a lower-carbon supply will have the largest effect. A real LCA study would replace every synthetic number with measured or verified data, apply an approved impact assessment method, and quantify the uncertainty around each result.</p>
+  <p>The immediate next step is a scoping conversation to agree the decision question, the process boundary, and the data you can supply. Section 10 lists exactly what we would need.</p>
+</section>
+
+<section id="scope" aria-labelledby="h-scope">
+  <h2 id="h-scope">What this study covers</h2>
+
+  <h3>Functional unit</h3>
+  <p>The <strong>functional unit (FU)</strong> &mdash; the reference quantity to which every result is normalised &mdash; is <strong>one tonne of wet grape pomace entering the valorisation process</strong>. To estimate the total impact of a full harvest season, multiply any result by the annual throughput in tonnes.</p>
+
+  <h3>System boundary</h3>
+  <p>The study covers the conversion stage only, from the point where pomace arrives at the valorisation facility to the point where products leave it (<em>gate-to-gate</em>). This includes:</p>
+  <ul>
+    <li>Grid electricity consumed by the process</li>
+    <li>Process heat (thermal energy for drying or hydrolysis)</li>
+    <li>Process water consumption</li>
+    <li>Enzyme preparation used in enzymatic hydrolysis</li>
+    <li>Transport of the pomace feedstock to the facility</li>
+    <li>A credit for the mineral fertiliser that the recovered material would replace if applied to agricultural land (an <em>avoided-burden credit</em> &mdash; see Assumptions)</li>
+  </ul>
+  <p>Grape growing, wine production, and the end-of-life of recovered products are outside the boundary. Expanding the boundary would change the results and must be agreed before a real study begins.</p>
+
+  <h3>System boundary diagram</h3>
+  <div class="boundary-wrap">
+    <svg viewBox="0 0 760 190" width="760" height="190" role="img"
+      aria-label="System boundary diagram. Inputs on the left: pomace feedstock, grid electricity, process heat, process water, enzyme preparation. These flow into a central box labelled Gate-to-gate conversion stage. Outputs on the right: recovered extract or compost. A dashed arrow labelled avoided mineral fertiliser credit exits the bottom-right with a note that it is subject to assumption approval.">
+      <defs>
+        <marker id="a1" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#4a4a4a"/></marker>
+        <marker id="a2" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#0f766e"/></marker>
+      </defs>
+      <!-- Centre box -->
+      <rect x="280" y="55" width="200" height="75" rx="4" fill="none" stroke="#1d4ed8" stroke-width="2"/>
+      <text x="380" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="600" fill="#1d4ed8">Gate-to-gate</text>
+      <text x="380" y="105" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#4a4a4a">conversion stage</text>
+      <!-- Input labels + arrows -->
+      <text x="8" y="67" font-family="-apple-system,sans-serif" font-size="11" fill="#4a4a4a">Pomace feedstock</text>
+      <line x1="152" y1="65" x2="278" y2="78" stroke="#4a4a4a" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="8" y="86" font-family="-apple-system,sans-serif" font-size="11" fill="#4a4a4a">Grid electricity</text>
+      <line x1="152" y1="84" x2="278" y2="88" stroke="#4a4a4a" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="8" y="105" font-family="-apple-system,sans-serif" font-size="11" fill="#4a4a4a">Process heat</text>
+      <line x1="152" y1="103" x2="278" y2="95" stroke="#4a4a4a" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="8" y="124" font-family="-apple-system,sans-serif" font-size="11" fill="#4a4a4a">Process water</text>
+      <line x1="152" y1="122" x2="278" y2="105" stroke="#4a4a4a" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="8" y="143" font-family="-apple-system,sans-serif" font-size="11" fill="#4a4a4a">Enzyme preparation</text>
+      <line x1="152" y1="141" x2="278" y2="118" stroke="#4a4a4a" stroke-width="1.5" marker-end="url(#a1)"/>
+      <!-- Output arrows -->
+      <line x1="480" y1="85" x2="520" y2="85" stroke="#4a4a4a" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="526" y="89" font-family="-apple-system,sans-serif" font-size="11" fill="#4a4a4a">Recovered extract / compost</text>
+      <!-- Credit dashed -->
+      <line x1="480" y1="105" x2="480" y2="140" stroke="#0f766e" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <line x1="480" y1="140" x2="520" y2="140" stroke="#0f766e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a2)"/>
+      <text x="526" y="135" font-family="-apple-system,sans-serif" font-size="11" fill="#0f766e">Avoided mineral fertiliser</text>
+      <text x="526" y="149" font-family="-apple-system,sans-serif" font-size="10" fill="#0f766e">(credit &mdash; subject to assumption approval)</text>
+      <!-- Out-of-scope note -->
+      <text x="8" y="176" font-family="-apple-system,sans-serif" font-size="10" fill="#767676">Outside boundary: grape growing &middot; wine production &middot; end-of-life of recovered products</text>
+    </svg>
+  </div>
+
+  <h3>Geography and years</h3>
+  <p>All calculations use Portuguese electricity and transport data (or their illustrative proxies). The baseline represents 2025 conditions. The four future scenarios project to 2030 and 2040, assuming Portugal&rsquo;s electricity mix evolves along different decarbonisation trajectories.</p>
+
+  <h3>Counterfactual</h3>
+  <p>A prospective LCA must state what currently happens to the material being studied &mdash; the <em>counterfactual</em>. In Portugal, grape pomace is primarily processed for marc brandy (aguardente) distillation; composting and animal feed are secondary routes; some goes to landfill. This study does not yet compare valorisation against a specific counterfactual. <strong>Defining the counterfactual is a required step before any real LCA can be finalised.</strong></p>
+</section>
+
+<section id="scenarios" aria-labelledby="h-scenarios">
+  <h2 id="h-scenarios">The five scenarios</h2>
+  <p>One baseline and four future scenarios are compared. Each future scenario combines assumptions about process efficiency changes (the <em>foreground</em> &mdash; what happens inside the facility) and about how Portugal&rsquo;s electricity grid changes (the <em>background</em> &mdash; the carbon intensity of the power supply). All assumptions are illustrative and proposed, not confirmed.</p>
+
+  <div class="scenario-list">
+    <div class="scenario-card baseline">
+      <div>
+        <span class="sc-label">Reference</span>
+        <div class="sc-name">Baseline 2025</div>
+        <div class="sc-year">Year: 2025</div>
+      </div>
+      <p class="sc-narrative">The starting point. The process uses 420&thinsp;kWh of electricity and 180&thinsp;kWh of process heat per tonne of pomace, at an illustrative 2025 Portuguese grid carbon intensity of 0.42&thinsp;kg CO₂e per kWh. No efficiency improvements are assumed. The avoided fertiliser credit is based on 0.35&thinsp;t of mineral fertiliser equivalent replaced per tonne of pomace.</p>
+    </div>
+    <div class="scenario-card">
+      <div>
+        <span class="sc-label">2030 &middot; Central</span>
+        <div class="sc-name">Central pathway</div>
+        <div class="sc-year">Year: 2030</div>
+      </div>
+      <p class="sc-narrative">Moderate process improvements &mdash; electricity use down 18%, heat use down 15%, enzyme dose down 10% &mdash; combined with a cleaner grid (illustrative: 0.24&thinsp;kg CO₂e per kWh, a 43% reduction). A credible but not exceptional pace of change in both technology and energy policy.</p>
+    </div>
+    <div class="scenario-card">
+      <div>
+        <span class="sc-label">2030 &middot; Conservative</span>
+        <div class="sc-name">Conservative pathway</div>
+        <div class="sc-year">Year: 2030</div>
+      </div>
+      <p class="sc-narrative">Limited foreground improvement &mdash; electricity use down 5%, heat use down 8%, enzyme dose down 2% &mdash; and modest grid progress (illustrative: 0.32&thinsp;kg CO₂e per kWh, a 24% reduction). Technology adoption is slow and the energy transition lags.</p>
+    </div>
+    <div class="scenario-card">
+      <div>
+        <span class="sc-label">2040 &middot; Conservative</span>
+        <div class="sc-name">Conservative pathway</div>
+        <div class="sc-year">Year: 2040</div>
+      </div>
+      <p class="sc-narrative">By 2040, even the conservative path reaches larger process improvements (electricity use down 20%, heat use down 20%), but the grid decarbonises only modestly (illustrative: 0.30&thinsp;kg CO₂e per kWh). Progress is real but constrained by cautious investment and slow policy change.</p>
+    </div>
+    <div class="scenario-card">
+      <div>
+        <span class="sc-label">2040 &middot; Ambitious</span>
+        <div class="sc-name">Ambitious pathway</div>
+        <div class="sc-year">Year: 2040</div>
+      </div>
+      <p class="sc-narrative">Strong efficiency gains &mdash; electricity use down 40%, heat use down 35%, water reuse up 25% &mdash; combined with a near-clean grid (illustrative: 0.12&thinsp;kg CO₂e per kWh, a 71% reduction) and a larger fertiliser credit from higher recovery. This represents aggressive technology learning and a high-ambition energy transition.</p>
+    </div>
+  </div>
+</section>
+
+<section id="results" aria-labelledby="h-results">
+  <h2 id="h-results">Results</h2>
+
+  <div class="callout warning">
+    <p><strong>Read before interpreting:</strong> Every number below comes from synthetic, illustrative inputs. No LCIA method has been applied or approved. The results show the shape of a possible outcome, not a measured or verified figure. Percentages refer to change versus the 2025 baseline under each scenario&rsquo;s specific assumptions.</p>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">
+      <strong>Percentage change vs. 2025 baseline &mdash; all scenarios and indicators</strong>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--neg-1)"></span>Climate (kg&thinsp;CO₂e)</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--neg-2)"></span>Water (m³)</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--neg-3)"></span>Energy (MJ)</span>
+    </div>
+    <!-- Grouped bar chart. Scale: 0% = y=28, -100% = y=268. 1% = 2.4 px. Bar w=34, gap=4. Group w=3x34+3x4+12=126. Groups at x=110,260,410,560 -->
+    <svg viewBox="0 0 760 310" width="100%" role="img"
+      aria-label="Grouped bar chart, percentage change versus 2025 baseline. Central 2030: climate minus 48 percent, water minus 31 percent, energy minus 17 percent. Conservative 2030: climate minus 25 percent, water minus 12 percent, energy minus 6 percent. Conservative 2040: climate minus 41 percent, water minus 29 percent, energy minus 20 percent. Ambitious 2040: climate minus 82 percent, water minus 66 percent, energy minus 38 percent. All bars represent reductions.">
+      <!-- Y axis -->
+      <line x1="94" y1="28" x2="94" y2="268" stroke="var(--rule)" stroke-width="1"/>
+      <!-- Grid lines and labels -->
+      <line x1="94" y1="28" x2="750" y2="28" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="82" y="32" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="-apple-system,sans-serif">0%</text>
+      <line x1="94" y1="76" x2="750" y2="76" stroke="var(--rule)" stroke-width="0.75"/>
+      <text x="82" y="80" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;20%</text>
+      <line x1="94" y1="124" x2="750" y2="124" stroke="var(--rule)" stroke-width="0.75"/>
+      <text x="82" y="128" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;40%</text>
+      <line x1="94" y1="172" x2="750" y2="172" stroke="var(--rule)" stroke-width="0.75"/>
+      <text x="82" y="176" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;60%</text>
+      <line x1="94" y1="220" x2="750" y2="220" stroke="var(--rule)" stroke-width="0.75"/>
+      <text x="82" y="224" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;80%</text>
+      <line x1="94" y1="268" x2="750" y2="268" stroke="var(--rule)" stroke-width="0.5"/>
+      <text x="82" y="272" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;100%</text>
+      <!-- Y axis label -->
+      <text x="14" y="148" text-anchor="middle" font-size="10" fill="var(--ink-3)" font-family="-apple-system,sans-serif" transform="rotate(-90,14,148)">Change vs. baseline</text>
+
+      <!-- Central 2030: climate -47.93% = 115px, water -31.38% = 75px, energy -17.12% = 41px -->
+      <rect x="110" y="28" width="34" height="115" fill="var(--neg-1)" rx="2"/>
+      <text x="127" y="150" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;48%</text>
+      <rect x="148" y="28" width="34" height="75" fill="var(--neg-2)" rx="2"/>
+      <text x="165" y="110" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;31%</text>
+      <rect x="186" y="28" width="34" height="41" fill="var(--neg-3)" rx="2"/>
+      <text x="203" y="76" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;17%</text>
+      <text x="165" y="283" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Central</text>
+      <text x="165" y="296" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="-apple-system,sans-serif">2030</text>
+
+      <!-- Conservative 2030: climate -24.73% = 59px, water -12.39% = 30px, energy -6.4% = 15px -->
+      <rect x="260" y="28" width="34" height="59" fill="var(--neg-1)" rx="2"/>
+      <text x="277" y="94" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;25%</text>
+      <rect x="298" y="28" width="34" height="30" fill="var(--neg-2)" rx="2"/>
+      <text x="315" y="65" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;12%</text>
+      <rect x="336" y="28" width="34" height="15" fill="var(--neg-3)" rx="2"/>
+      <text x="353" y="50" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;6%</text>
+      <text x="315" y="283" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Conservative</text>
+      <text x="315" y="296" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="-apple-system,sans-serif">2030</text>
+
+      <!-- Conservative 2040: climate -41.13% = 99px, water -29.36% = 70px, energy -20.32% = 49px -->
+      <rect x="410" y="28" width="34" height="99" fill="var(--neg-1)" rx="2"/>
+      <text x="427" y="134" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;41%</text>
+      <rect x="448" y="28" width="34" height="70" fill="var(--neg-2)" rx="2"/>
+      <text x="465" y="105" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;29%</text>
+      <rect x="486" y="28" width="34" height="49" fill="var(--neg-3)" rx="2"/>
+      <text x="503" y="84" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;20%</text>
+      <text x="465" y="283" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Conservative</text>
+      <text x="465" y="296" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="-apple-system,sans-serif">2040</text>
+
+      <!-- Ambitious 2040: climate -82.35% = 198px, water -65.99% = 158px, energy -38.33% = 92px -->
+      <rect x="560" y="28" width="34" height="198" fill="var(--neg-1)" rx="2"/>
+      <text x="577" y="233" text-anchor="middle" font-size="9" fill="var(--surface)" font-weight="600" font-family="-apple-system,sans-serif">&#8722;82%</text>
+      <rect x="598" y="28" width="34" height="158" fill="var(--neg-2)" rx="2"/>
+      <text x="615" y="193" text-anchor="middle" font-size="9" fill="var(--surface)" font-weight="600" font-family="-apple-system,sans-serif">&#8722;66%</text>
+      <rect x="636" y="28" width="34" height="92" fill="var(--neg-3)" rx="2"/>
+      <text x="653" y="127" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;38%</text>
+      <text x="615" y="283" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Ambitious</text>
+      <text x="615" y="296" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="-apple-system,sans-serif">2040</text>
+    </svg>
+    <p class="chart-note">Bars represent reductions relative to the 2025 baseline. Larger bars indicate greater improvement under that scenario&rsquo;s assumptions. Source: illustrative synthetic calculations &mdash; not validated LCIA results. Climate = climate-change proxy (kg&thinsp;CO₂e); Water = water-use proxy (m³); Energy = primary-energy proxy (MJ). All per tonne wet pomace.</p>
+  </div>
+
+  <h3>Scenario results table</h3>
+  <p>Values rounded to 3 significant figures in the main table. Exact values are in the Appendix. Units are in column headers; they are not repeated in each cell.</p>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">Illustrative scenario results. Baseline highlighted. Delta values show change vs. 2025 baseline.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Scenario</th>
+          <th scope="col">Year</th>
+          <th scope="col" data-unit="kg CO₂e / t pomace">Climate proxy</th>
+          <th scope="col" data-unit="m³ / t pomace">Water proxy</th>
+          <th scope="col" data-unit="MJ / t pomace">Energy proxy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="baseline-row">
+          <td>Baseline 2025</td><td>2025</td>
+          <td>221</td><td>2.55</td><td>2360</td>
+        </tr>
+        <tr>
+          <td>Central 2030</td><td>2030</td>
+          <td>115 <span class="delta">48%</span></td>
+          <td>1.75 <span class="delta">31%</span></td>
+          <td>1960 <span class="delta">17%</span></td>
+        </tr>
+        <tr>
+          <td>Conservative 2030</td><td>2030</td>
+          <td>167 <span class="delta">25%</span></td>
+          <td>2.23 <span class="delta">12%</span></td>
+          <td>2210 <span class="delta">6%</span></td>
+        </tr>
+        <tr>
+          <td>Conservative 2040</td><td>2040</td>
+          <td>130 <span class="delta">41%</span></td>
+          <td>1.80 <span class="delta">29%</span></td>
+          <td>1880 <span class="delta">20%</span></td>
+        </tr>
+        <tr>
+          <td>Ambitious 2040</td><td>2040</td>
+          <td>39.0 <span class="delta">82%</span></td>
+          <td>0.867 <span class="delta">66%</span></td>
+          <td>1460 <span class="delta">38%</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:0.78rem; color:var(--ink-3);">Delta arrows show percentage reduction vs. baseline. Rounding to 3 significant figures means small discrepancies between the table and exact values in the Appendix are expected. All numbers are illustrative.</p>
+</section>
+
+<section id="hotspot" aria-labelledby="h-hotspot">
+  <h2 id="h-hotspot">Where the climate impact comes from</h2>
+  <p>This chart shows each process input&rsquo;s contribution to the baseline climate proxy (2025). A bar extending to the right is a burden; a bar extending to the left is a credit &mdash; a burden that the process avoids because its recovered product replaces something that would otherwise have been produced.</p>
+
+  <div class="chart-wrap">
+    <div class="chart-title">
+      <strong>Baseline 2025 &mdash; climate contributions by input</strong>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--neg-1)"></span>Burden</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--credit)"></span>Credit (avoided burden)</span>
+    </div>
+    <!-- Horizontal bar. Scale: 176.4 = 480px max. 1 kg = 2.72px. Zero at x=220. -->
+    <svg viewBox="0 0 750 235" width="100%" role="img"
+      aria-label="Horizontal bar chart of 2025 baseline climate contributions per tonne pomace. Grid electricity 176 kg CO2e is the dominant burden, shown as the longest bar. Process heat 45 kg CO2e. Feedstock transport 14 kg CO2e. Enzyme preparation 2.9 kg CO2e. Process water 0.001 kg CO2e, negligible. Avoided mineral fertiliser credit minus 17.5 kg CO2e shown as a teal bar extending left.">
+      <!-- Zero line -->
+      <line x1="218" y1="18" x2="218" y2="220" stroke="var(--ink-3)" stroke-width="1.5"/>
+      <text x="218" y="13" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">0</text>
+      <!-- Right axis labels -->
+      <text x="362" y="13" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">50</text>
+      <line x1="362" y1="15" x2="362" y2="220" stroke="var(--rule)" stroke-width="0.5"/>
+      <text x="506" y="13" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">100</text>
+      <line x1="506" y1="15" x2="506" y2="220" stroke="var(--rule)" stroke-width="0.5"/>
+      <text x="650" y="13" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">150</text>
+      <line x1="650" y1="15" x2="650" y2="220" stroke="var(--rule)" stroke-width="0.5"/>
+      <text x="700" y="13" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">176</text>
+      <!-- Left axis label -->
+      <text x="170" y="13" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">&#8722;20</text>
+      <line x1="170" y1="15" x2="170" y2="220" stroke="var(--rule)" stroke-width="0.5"/>
+      <text x="700" y="225" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="-apple-system,sans-serif">kg CO₂e / t pomace</text>
+
+      <!-- Grid electricity: 176.4 => 480px -->
+      <rect x="218" y="28" width="480" height="24" fill="var(--neg-1)" rx="2"/>
+      <text x="12" y="44" font-size="11" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Grid electricity</text>
+      <text x="704" y="44" font-size="11" fill="var(--ink)" font-family="-apple-system,sans-serif">176</text>
+
+      <!-- Process heat: 45 => 122px -->
+      <rect x="218" y="63" width="122" height="24" fill="var(--neg-1)" rx="2"/>
+      <text x="12" y="79" font-size="11" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Process heat</text>
+      <text x="346" y="79" font-size="11" fill="var(--ink)" font-family="-apple-system,sans-serif">45</text>
+
+      <!-- Avoided fertiliser credit: -17.5 => 48px left of zero -->
+      <rect x="170" y="98" width="48" height="24" fill="var(--credit)" rx="2"/>
+      <text x="12" y="114" font-size="11" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Fertiliser credit</text>
+      <text x="115" y="114" font-size="11" fill="var(--credit)" font-family="-apple-system,sans-serif">&#8722;18</text>
+      <text x="224" y="114" font-size="9" fill="var(--credit)" font-family="-apple-system,sans-serif">(avoided burden)</text>
+
+      <!-- Feedstock transport: 14.4 => 39px -->
+      <rect x="218" y="133" width="39" height="24" fill="var(--neg-1)" rx="2"/>
+      <text x="12" y="149" font-size="11" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Feedstock transport</text>
+      <text x="263" y="149" font-size="11" fill="var(--ink)" font-family="-apple-system,sans-serif">14</text>
+
+      <!-- Enzyme preparation: 2.88 => 8px -->
+      <rect x="218" y="168" width="8" height="24" fill="var(--neg-1)" rx="2"/>
+      <text x="12" y="184" font-size="11" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Enzyme preparation</text>
+      <text x="232" y="184" font-size="11" fill="var(--ink)" font-family="-apple-system,sans-serif">2.9</text>
+
+      <!-- Process water: 0.00084 — shown as text only -->
+      <text x="12" y="219" font-size="11" fill="var(--ink-2)" font-family="-apple-system,sans-serif">Process water</text>
+      <text x="224" y="219" font-size="11" fill="var(--ink-3)" font-family="-apple-system,sans-serif">0.001 &mdash; negligible at this scale (no bar visible)</text>
+    </svg>
+    <p class="chart-note">
+      Baseline year 2025. Values rounded to 3 significant figures. Grid electricity contributes approximately 80% of the total climate burden (176 of 221&thinsp;kg CO₂e per tonne pomace). The fertiliser credit (&#8722;18&thinsp;kg CO₂e, teal) represents a burden avoided by replacing mineral fertiliser with recovered material &mdash; this is an assumption requiring scientific approval for a real study. Process water&rsquo;s climate contribution (0.001&thinsp;kg CO₂e) is correct but invisible at this scale; it is included in the total.
+    </p>
+  </div>
+</section>
+
+<section id="decomposition" aria-labelledby="h-decomp">
+  <h2 id="h-decomp">What drives the reductions</h2>
+  <p>In a prospective LCA, a key question is: how much of the projected improvement comes from changing the process itself (the <em>foreground</em> &mdash; under the operator&rsquo;s control) versus from using a cleaner electricity grid (the <em>background</em> &mdash; which depends on national energy policy)?</p>
+
+  <div class="callout">
+    <p><strong>This decomposition is not available from the current synthetic data.</strong> The calculations change both foreground and background simultaneously in each scenario, so the two effects cannot currently be separated from the total.</p>
+  </div>
+
+  <div class="gap-box">
+    <h3>What would be needed to show foreground vs. background</h3>
+    <ol>
+      <li><strong>Foreground-only variant:</strong> apply process efficiency changes but keep electricity factors at their 2025 values &mdash; shows the impact of operational improvements alone.</li>
+      <li><strong>Background-only variant:</strong> keep process quantities at baseline levels but update electricity factors to the scenario year &mdash; shows the impact of grid decarbonisation alone.</li>
+      <li><strong>Interaction term:</strong> the small remainder when both effects are combined.</li>
+    </ol>
+    <p style="margin-top:0.75rem; font-size:0.875rem; color:var(--ink-2);">The current data structure already separates foreground and background items, so this analysis is feasible without structural changes. It would require running two additional variants per scenario.</p>
+  </div>
+
+  <p>[ASSUMPTION] As an indicative estimate: because grid electricity contributes roughly 80% of baseline climate impact and the illustrative grid factor drops from 0.42 to 0.12&thinsp;kg CO₂e/kWh in the ambitious 2040 scenario (a 71% reduction), a large share of the climate reduction in that scenario is likely attributable to grid decarbonisation rather than process improvements. This should be computed, not assumed.</p>
+</section>
+
+<section id="assumptions" aria-labelledby="h-assumptions">
+  <h2 id="h-assumptions">Assumptions and choices</h2>
+  <p>Every LCA rests on choices about what to include, how to model it, and what data to use. The table below lists the eight principal choices in this study, what each means in practice, and its current status. None have been confirmed by a scientific reviewer.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Choice</th>
+          <th scope="col">What it means in practice</th>
+          <th scope="col">Status</th>
+          <th scope="col">Owner</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Study goal</td>
+          <td>This document demonstrates a workflow for comparing future scenarios; it is not a decision study or a commissioned LCA under ISO 14040/14044.</td>
+          <td><span class="status-badge status-proposed">Proposed</span></td>
+          <td>[AUTHOR]</td>
+        </tr>
+        <tr>
+          <td>Functional unit</td>
+          <td>Results are expressed per tonne of wet grape pomace entering the process. A winery processing 500&thinsp;t per season would multiply all results by 500.</td>
+          <td><span class="status-badge status-proposed">Proposed</span></td>
+          <td>[AUTHOR]</td>
+        </tr>
+        <tr>
+          <td>System boundary</td>
+          <td>Only the gate-to-gate conversion stage is included. Grape growing, wine production, and what happens to recovered products after they leave the facility are excluded. Expanding the boundary would change the results.</td>
+          <td><span class="status-badge status-proposed">Proposed</span></td>
+          <td>[AUTHOR]</td>
+        </tr>
+        <tr>
+          <td>Modelling type</td>
+          <td>The study uses an attributional approach, which describes what happens rather than what would happen if market supply changed. Note: the avoided-fertiliser credit is a system-expansion technique more typical of consequential LCA. This inconsistency must be resolved before a real study is finalised.</td>
+          <td><span class="status-badge status-proposed">Proposed</span></td>
+          <td>[AUTHOR]</td>
+        </tr>
+        <tr>
+          <td>Background electricity</td>
+          <td>Each scenario uses a different illustrative carbon intensity for Portuguese grid electricity. These values are not drawn from a published prospective database; they are synthetic placeholders chosen to illustrate a credible range. A real study requires verified, peer-reviewed grid projections.</td>
+          <td><span class="status-badge status-proposed">Proposed</span></td>
+          <td>[AUTHOR]</td>
+        </tr>
+        <tr>
+          <td>Technology scale-up</td>
+          <td>Future process quantities (electricity, heat, water, enzymes) are reduced by simple percentage multipliers. No engineering model, technology learning curve, or pilot-plant data underpins these multipliers. A real study requires evidence for each efficiency assumption.</td>
+          <td><span class="status-badge status-proposed">Proposed</span></td>
+          <td>[AUTHOR]</td>
+        </tr>
+        <tr>
+          <td>Avoided fertiliser credit</td>
+          <td>The study assumes recovered material replaces 0.35&thinsp;t of mineral fertiliser per tonne of pomace, giving a credit of &#8722;18&thinsp;kg CO₂e (about 8% of the baseline total). The nutrient content of the recovered material and the correct treatment method (system expansion vs. allocation) must be verified before this credit is used in a real study.</td>
+          <td><span class="status-badge status-proposed">Proposed</span></td>
+          <td>[AUTHOR]</td>
+        </tr>
+        <tr>
+          <td>Impact factors</td>
+          <td>The three indicators (climate, water, energy) use original illustrative factors, not a published or peer-reviewed life cycle impact assessment (LCIA) database. A real study would use an approved, versioned method such as ReCiPe 2016, CML-IA, or EF 3.1.</td>
+          <td><span class="status-badge status-proposed">Proposed</span></td>
+          <td>[AUTHOR]</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="limitations" aria-labelledby="h-limitations">
+  <h2 id="h-limitations">Limitations and how to read these results</h2>
+
+  <h3>What these results are</h3>
+  <p>These are the outputs of a <em>workflow demonstration</em>: illustrative calculations showing how a prospective LCA would be structured, what inputs it needs, and what kinds of results it could produce. The numbers are internally consistent but not connected to real measured data.</p>
+
+  <h3>What these results are not</h3>
+  <ul>
+    <li><strong>Not validated LCIA results.</strong> No approved life cycle impact assessment method has been applied. The three indicators are proxies.</li>
+    <li><strong>Not ISO 14040/14044-compliant.</strong> The study does not meet the requirements for a published LCA, including critical review, data quality assessment, or peer verification.</li>
+    <li><strong>Not decision-grade information.</strong> Do not use these numbers to justify investment, regulatory, or procurement decisions.</li>
+    <li><strong>No uncertainty analysis.</strong> Every number is a single point estimate. The true result for a real process could differ substantially; a real study would quantify this uncertainty.</li>
+    <li><strong>No sensitivity analysis.</strong> The effect of varying individual assumptions &mdash; for example, removing the fertiliser credit, or using a slower grid decarbonisation trajectory &mdash; has not been tested.</li>
+  </ul>
+
+  <h3>What would change these results</h3>
+  <ul>
+    <li>Using real site data (measured electricity, heat, water, and enzyme quantities)</li>
+    <li>Applying a published, versioned LCIA method</li>
+    <li>Using peer-reviewed prospective electricity background projections</li>
+    <li>Defining and computing the counterfactual (what currently happens to this pomace)</li>
+    <li>Verifying the fertiliser credit size and treatment method</li>
+    <li>Adding uncertainty and sensitivity analysis</li>
+  </ul>
+
+  <h3>Validation note</h3>
+  <p>Automated consistency checks confirmed that the calculation inputs, assumption ledger, and result outputs are internally consistent: no schema errors, no unit mismatches, no missing required fields. <strong>This is not scientific peer review.</strong> It means the calculation adds up and no fields are empty. It does not mean the numbers are correct or the method is approved for any purpose beyond workflow demonstration.</p>
+</section>
+
+<section id="nextsteps" aria-labelledby="h-nextsteps">
+  <h2 id="h-nextsteps">Next steps</h2>
+  <p>To convert this methodology preview into a real, decision-grade LCA, we would work through a structured scoping and data-collection phase.</p>
+
+  <h3>What we need from you</h3>
+  <div class="gap-box">
+    <h3>Information required for a real study</h3>
+    <ol>
+      <li><strong>Decision question:</strong> What exactly are you trying to decide? For example: &ldquo;Should we invest in enzymatic valorisation by 2030 rather than continuing to send pomace to distillation?&rdquo;</li>
+      <li><strong>Process data:</strong> Measured or estimated electricity consumption (kWh per tonne pomace), heat demand, water use, enzyme purchase quantities, and transport distances to the facility.</li>
+      <li><strong>Current pomace route:</strong> Where does your pomace currently go? (Distillation, composting, animal feed, landfill, or a mix.) This defines the counterfactual.</li>
+      <li><strong>Recovered product:</strong> What does the valorisation process produce (extract, compost, biogas, other)? What is its nutrient or energy content? This determines whether and how a fertiliser or energy credit is justified.</li>
+      <li><strong>Scale:</strong> Annual throughput in tonnes and whether the process is at pilot, demonstration, or commercial scale.</li>
+      <li><strong>Target years:</strong> Which future years are relevant to your decision (2030, 2035, 2040)?</li>
+      <li><strong>Confidentiality requirements:</strong> What data can be published or shared, and what must remain confidential?</li>
+    </ol>
+  </div>
+
+  <h3>Proposed workflow</h3>
+  <ol>
+    <li><strong>Scoping meeting</strong> (approximately 1 hour) &mdash; agree the decision question, boundary, and data requirements.</li>
+    <li><strong>Data collection</strong> &mdash; you supply site measurements or estimates; we identify gaps requiring literature values or engineering estimates.</li>
+    <li><strong>Methodology agreement</strong> &mdash; agree the LCIA method, background database, scenario definitions, and credit treatment before calculating.</li>
+    <li><strong>Calculation and review</strong> &mdash; we run the calculations, share a draft, and invite your review before finalising.</li>
+    <li><strong>Final report</strong> &mdash; a fully documented result with uncertainty analysis, sensitivity analysis, and a clear statement of what the results do and do not support.</li>
+  </ol>
+
+  <p>To proceed, contact <strong>[CONTACT NAME]</strong> at <strong>[CONTACT EMAIL]</strong>.</p>
+</section>
+
+<section id="appendix" aria-labelledby="h-appendix">
+  <h2 id="h-appendix">Appendix</h2>
+
+  <h3>Glossary</h3>
+  <dl>
+    <dt>Life Cycle Assessment (LCA)</dt>
+    <dd>A method for estimating the environmental impacts of a product or process across its full life cycle. Governed by ISO 14040 and ISO 14044.</dd>
+    <dt>Life Cycle Impact Assessment (LCIA)</dt>
+    <dd>The step within LCA that converts inventory flows (kg of CO₂, kWh of electricity, m³ of water) into environmental impact scores using published characterisation factors. Examples: ReCiPe 2016, CML-IA, EF 3.1.</dd>
+    <dt>Functional unit (FU)</dt>
+    <dd>The reference quantity to which all results are normalised. In this study: one tonne of wet grape pomace processed.</dd>
+    <dt>System boundary</dt>
+    <dd>The line drawn around what is included and excluded. This study uses a gate-to-gate boundary covering only the conversion stage.</dd>
+    <dt>Foreground</dt>
+    <dd>The processes directly controlled by the operator (electricity use, heat, water, enzymes). Foreground data are measured or estimated from the actual process.</dd>
+    <dt>Background</dt>
+    <dd>The upstream systems supplying inputs (electricity grid, transport network, raw material production). Background data come from LCA databases such as ecoinvent.</dd>
+    <dt>Prospective (ex-ante) LCA</dt>
+    <dd>An LCA that considers how future changes in both the process and the background system affect environmental outcomes, in contrast to an LCA of current technology with today&rsquo;s grid.</dd>
+    <dt>Scenario</dt>
+    <dd>A coherent, internally consistent set of assumptions about future conditions. Scenarios are not predictions; they explore a credible range of futures.</dd>
+    <dt>Proxy indicator</dt>
+    <dd>An impact metric that approximates a real LCIA category without using an approved characterisation method. Used here because no LCIA method has been applied.</dd>
+    <dt>Avoided-burden credit</dt>
+    <dd>A credit applied when a co-product or recovered material replaces another product that would otherwise have been produced, thereby avoiding its environmental impact.</dd>
+    <dt>Gate-to-gate</dt>
+    <dd>A system boundary that begins at the entry gate of a processing facility and ends at its exit gate, excluding upstream and downstream stages.</dd>
+    <dt>IAM-coupled background</dt>
+    <dd>A background database whose future factors are derived from Integrated Assessment Models &mdash; global energy-economy models used in climate research (for example, the premise tool using SSP/IAM scenarios).</dd>
+  </dl>
+
+  <h3 style="margin-top:2rem;">Technical identifiers</h3>
+  <p style="font-size:0.875rem; color:var(--ink-2); margin-bottom:0.75rem;">The identifiers below are used internally by the calculation system to link inputs, assumptions, and results. They are provided here for reproducibility and are not intended to be interpreted by readers of this document.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Item</th>
+          <th scope="col">Internal identifier</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Study</td><td><span class="appendix-item">synthetic-winery-pomace-2026</span></td></tr>
+        <tr><td>Baseline scenario</td><td><span class="appendix-item">baseline-2025 &mdash; observed-baseline</span></td></tr>
+        <tr><td>Central 2030 scenario</td><td><span class="appendix-item">central-2030 &mdash; central</span></td></tr>
+        <tr><td>Conservative 2030 scenario</td><td><span class="appendix-item">conservative-2030 &mdash; conservative</span></td></tr>
+        <tr><td>Conservative 2040 scenario</td><td><span class="appendix-item">conservative-2040 &mdash; conservative</span></td></tr>
+        <tr><td>Ambitious 2040 scenario</td><td><span class="appendix-item">ambitious-2040 &mdash; ambitious</span></td></tr>
+        <tr><td>Run ID</td><td><span class="appendix-item">7ffd6c35-d70f-5002-9277-b65478c16978</span></td></tr>
+        <tr><td>Input manifest hash (SHA-256)</td><td><span class="appendix-item">ff214381ecdcd248fdc9748a7a82bef0e38c820959f7b552bb0f8a75abc47730</span></td></tr>
+        <tr><td>Assumption ledger hash (SHA-256)</td><td><span class="appendix-item">45e699cbc52eff90a0cb641f134bbf89218971b36903a5164a9579226d472f64</span></td></tr>
+        <tr><td>Result artifact hash (SHA-256)</td><td><span class="appendix-item">8a7e02e907dd52df5a0f3b63fc9303de942808fe058696d1ae54c4f2c82a407c</span></td></tr>
+        <tr><td>Licensed data included</td><td><span class="appendix-item">false</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:2rem;">Exact values</h3>
+  <p style="font-size:0.875rem; color:var(--ink-2); margin-bottom:0.75rem;">Full-precision values as computed from synthetic inputs. The main results table rounds to 3 significant figures; small discrepancies are expected and not errors.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Scenario</th>
+          <th scope="col" data-unit="kg CO₂e">Climate</th>
+          <th scope="col" data-unit="m³">Water</th>
+          <th scope="col" data-unit="MJ">Energy</th>
+          <th scope="col" data-unit="vs. baseline">&#916; climate</th>
+          <th scope="col" data-unit="vs. baseline">&#916; water</th>
+          <th scope="col" data-unit="vs. baseline">&#916; energy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="baseline-row">
+          <td>Baseline 2025</td>
+          <td>221.2</td><td>2.548</td><td>2363</td>
+          <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+        </tr>
+        <tr>
+          <td>Central 2030</td>
+          <td>115.2</td><td>1.748</td><td>1958</td>
+          <td>&#8722;47.93%</td><td>&#8722;31.38%</td><td>&#8722;17.12%</td>
+        </tr>
+        <tr>
+          <td>Conservative 2030</td>
+          <td>166.5</td><td>2.232</td><td>2212</td>
+          <td>&#8722;24.73%</td><td>&#8722;12.39%</td><td>&#8722;6.40%</td>
+        </tr>
+        <tr>
+          <td>Conservative 2040</td>
+          <td>130.2</td><td>1.800</td><td>1883</td>
+          <td>&#8722;41.13%</td><td>&#8722;29.36%</td><td>&#8722;20.32%</td>
+        </tr>
+        <tr>
+          <td>Ambitious 2040</td>
+          <td>39.03</td><td>0.8667</td><td>1457</td>
+          <td>&#8722;82.35%</td><td>&#8722;65.99%</td><td>&#8722;38.33%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:2rem;">Baseline climate contributions (exact)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Input</th>
+          <th scope="col" data-unit="kg CO₂e / t pomace">Climate contribution</th>
+          <th scope="col" data-unit="% of gross burden">Share</th>
+          <th scope="col">Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Grid electricity</td><td>176.4</td><td>79.8%</td><td>420 kWh &times; 0.42 kg CO₂e/kWh</td></tr>
+        <tr><td>Process heat</td><td>45.0</td><td>20.4%</td><td>180 kWh &times; 0.25 kg CO₂e/kWh</td></tr>
+        <tr><td>Feedstock transport</td><td>14.4</td><td>6.5%</td><td>180 t&middot;km &times; 0.08 kg CO₂e/t&middot;km</td></tr>
+        <tr><td>Enzyme preparation</td><td>2.88</td><td>1.3%</td><td>1.2 kg &times; 2.4 kg CO₂e/kg</td></tr>
+        <tr><td>Process water</td><td>0.00084</td><td>&lt;0.001%</td><td>2.8 m³ &times; 0.0003 kg CO₂e/m³</td></tr>
+        <tr style="color:var(--credit); font-weight:600;"><td>Avoided fertiliser credit</td><td>&#8722;17.5</td><td>&#8722;7.9%</td><td>&#8722;0.35 t &times; 50 kg CO₂e/t &mdash; subject to assumption approval</td></tr>
+        <tr style="font-weight:600; border-top:2px solid var(--rule);"><td>Total</td><td>221.2</td><td>100%</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:0.78rem; color:var(--ink-3);">Share of gross burden calculated excluding the credit. The credit is shown separately. All values are illustrative synthetic inputs.</p>
+</section>
+
+</div><!-- /.page -->
+
+<footer>
+  <div class="page">
+    <p>Prepared by [AUTHOR NAME] &middot; [CONTACT EMAIL] &middot; October 2026</p>
+    <p>Generated using AWAM Prospective LCA Workbench 0.1.1. Synthetic demonstration &mdash; not for scientific or external decision-making.</p>
+    <p>All numbers are computed from illustrative synthetic inputs. No LCIA method has been applied or approved. Read the Limitations section before sharing or citing any result.</p>
+  </div>
+</footer>
+
+</body>
+</html>
