@@ -1,0 +1,20 @@
+{
+  "source": "Exact display values supplied in the user's report brief",
+  "status": "Synthetic demonstration; not an approved LCIA method",
+  "scenarios": [
+    {"id": "baseline-2025", "label": "Reference · 2025", "totals": ["221.2", "2.548", "2363"], "supplied_percent": null},
+    {"id": "central-2030", "label": "Central · 2030", "totals": ["115.2", "1.748", "1958"], "supplied_percent": ["-47.93", "-31.38", "-17.12"]},
+    {"id": "conservative-2030", "label": "Conservative · 2030", "totals": ["166.5", "2.232", "2212"], "supplied_percent": ["-24.73", "-12.39", "-6.4"]},
+    {"id": "conservative-2040", "label": "Conservative · 2040", "totals": ["130.2", "1.800", "1883"], "supplied_percent": ["-41.13", "-29.36", "-20.32"]},
+    {"id": "ambitious-2040", "label": "Ambitious · 2040", "totals": ["39.03", "0.8667", "1457"], "supplied_percent": ["-82.35", "-65.99", "-38.33"]}
+  ],
+  "baseline_climate_contributions": [
+    {"label": "Grid electricity", "value": "176.4"},
+    {"label": "Process heat", "value": "45"},
+    {"label": "Fertiliser credit", "value": "-17.5"},
+    {"label": "Feedstock transport", "value": "14.4"},
+    {"label": "Enzyme preparation", "value": "2.88"},
+    {"label": "Process water", "value": "0.00084"}
+  ],
+  "supplied_contribution_sum": "221.18"
+}

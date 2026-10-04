@@ -2,7 +2,7 @@
 
 A local-first, auditable companion for prospective life-cycle assessment work. It is designed to sit around established tools such as openLCA, ecoinvent, Brightway, and premise rather than replace them.
 
-**Review the prototype:** [Live synthetic demo](https://hostilian.github.io/prospective-lca/) · [Reviewer brief](docs/reviewer_brief.md) · [CI and Docker verification](https://github.com/Hostilian/prospective-lca/actions/workflows/ci.yml) · [Two-minute walkthrough](docs/demo_script.md)
+**Review the prototype:** [Customer methodology preview](https://hostilian.github.io/prospective-lca/customer/) · [Methods-review preview](https://hostilian.github.io/prospective-lca/reviewer/) · [Original calculation report](https://hostilian.github.io/prospective-lca/report.html) · [Reviewer brief](docs/reviewer_brief.md) · [CI and Docker verification](https://github.com/Hostilian/prospective-lca/actions/workflows/ci.yml)
 
 This is a discussion prototype for Fraunhofer Portugal AWAM. Its winery example and impact factors are synthetic. It is ready to demonstrate the workflow, but no real AWAM model has been connected or scientifically validated.
 
@@ -25,12 +25,15 @@ The repository currently contains a complete offline vertical slice:
 
 The demo is intentionally synthetic. It is not an AWAM result, not an approved LCIA method, and not evidence that any future pathway will occur.
 
+The two editorial previews present the same synthetic evidence for different readers. They preserve the supplied display totals and original percentages in an appendix, explicitly disclose three-significant-figure rounding and percentage discrepancies, show signed credits, and distinguish an ordered synthetic decomposition from the headline values. Author/contact and customer details remain placeholders. See [the specification and unanswered intake questions](docs/report-preview-specification.md) and [preview QA](docs/report-preview-qa.md).
+
 ## Quick start
 
 From the repository root:
 
 ```bash
 python3 -m app.cli demo --out exports/demo
+python3 tools/build_report_previews.py --package exports/demo
 python3 -m app.cli serve --dir exports/demo
 ```
 
@@ -38,13 +41,16 @@ Open `http://127.0.0.1:8765/` in a browser. The generated package contains:
 
 ```text
 exports/demo/
-  index.html          # local dashboard/report
-  report.html         # same self-contained report
+  index.html          # self-contained customer methodology preview
+  customer/index.html # customer version, with relative comparison navigation
+  reviewer/index.html # self-contained methods-review version
+  report.html         # original engine calculation report
   run.json            # machine-readable results and validation
   manifest.json       # reproducibility metadata and hashes
   results.csv
   contributions.csv
   assumptions.csv
+  preview-manifest.json # separate preview-data / HTML fingerprints and decomposition
 ```
 
 ### Docker quick start
@@ -60,6 +66,8 @@ Open `http://127.0.0.1:8765/`. The container does not include licensed databases
 ### GitHub Pages and CI
 
 The repository pipeline is defined in `.github/workflows/ci.yml`. It runs the test suite on Python 3.11–3.13, checks that the production gate remains fail-closed, rejects licensed/database artifacts, builds and smoke-tests Docker, and deploys the generated synthetic report to GitHub Pages from `main`. See [docs/deployment.md](docs/deployment.md).
+
+The Pages build generates both editorial preview routes after the unchanged synthetic engine exports its calculation package. Each preview is one standalone HTML file with inline styles, SVG charts and optional print-button JavaScript. Core content works without JavaScript or external assets; the original engine HTML remains available at `report.html`.
 
 ## Commands
 

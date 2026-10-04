@@ -42,12 +42,18 @@ jobs:
       - name: Generate synthetic review package
         run: python -m app.cli demo --out /tmp/awam-demo
 
+      - name: Build both self-contained report previews
+        run: python tools/build_report_previews.py --package /tmp/awam-demo
+
       - name: Verify synthetic package has required artifacts
         run: |
           test -s /tmp/awam-demo/index.html
           test -s /tmp/awam-demo/run.json
           test -s /tmp/awam-demo/manifest.json
           test -s /tmp/awam-demo/results.csv
+          test -s /tmp/awam-demo/customer/index.html
+          test -s /tmp/awam-demo/reviewer/index.html
+          test -s /tmp/awam-demo/preview-manifest.json
 
       - name: Verify production approval gate remains fail-closed
         shell: bash
@@ -118,7 +124,9 @@ jobs:
           python-version: "3.12"
 
       - name: Generate Pages artifact
-        run: python -m app.cli demo --out _site
+        run: |
+          python -m app.cli demo --out _site
+          python tools/build_report_previews.py --package _site
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
