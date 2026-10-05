@@ -1,42 +1,28 @@
-# Reproducible deployment
+# Reproduce and deploy the review package
 
-The workbench has three supported execution paths:
-
-1. **Local Python** for development and review.
-2. **Docker** for a stable, isolated demo server.
-3. **GitHub Pages** for the generated synthetic review package.
-
-## Local
+## Local review
 
 ```bash
-python3 -m app.cli demo --out exports/demo
-python3 -m app.cli serve --dir exports/demo
+python -m app.cli demo --out exports/demo
+python tools/build_report_previews.py --package exports/demo
+python tools/verify_review_package.py --package exports/demo
+python -m app.cli serve --dir exports/demo
 ```
 
-## Docker
+The study brief is served at `/` and `/customer/`; the technical report is at `/reviewer/`. The original engine report remains at `/report.html`.
+
+## Container
 
 ```bash
 docker compose up --build
 ```
 
-Open `http://localhost:8765/`. The image contains only the application, the original synthetic project, and the schemas. It does not contain openLCA databases, ecoinvent files, credentials, or confidential data.
+The image generates both report routes and verifies their calculation/document fingerprints during construction. Runtime needs no network or licensed database. The static server is a demonstration endpoint, not an authenticated researcher system.
 
-## GitHub Pages
+## GitHub
 
-The workflow at `.github/workflows/ci.yml` regenerates the site from the synthetic project and deploys it when a commit reaches the repository’s `main` branch. The Pages source must be set to **GitHub Actions** once in the repository settings.
+The `quality-and-pages` workflow tests Python 3.11–3.13, compiles application/tests/tools, generates and verifies the export package, and checks that production validation returns the expected blocking exit code. It bundles the exports with the exact source revision and checksums, then retains the Python 3.12 package as the `technical-review-package` artifact for 30 days. Known database filename patterns are rejected; this is not a general data-confidentiality classifier.
 
-The generated root page is the self-contained report. The same deployment also exposes `run.json`, `manifest.json`, CSV exports, and `report.html` for review and reproducibility.
+The Docker job builds the image and checks the study brief, technical route and diagnostic JSON over HTTP. Pages deploys from `main` only after quality and Docker jobs pass; its package is also verified before upload and published as `technical-review-package.zip`.
 
-## Pipeline guarantees
-
-- Python compilation and the full offline test suite run on every push and pull request.
-- Demo generation is verified in CI.
-- The production approval gate is tested to ensure unresolved synthetic choices remain blocked.
-- Forbidden licensed or database files are rejected.
-- A Docker image is built and started in CI, with an HTTP smoke check.
-- GitHub Pages deploys only from `main`, after quality and Docker checks pass.
-
-## Scientific boundary
-
-The public site is a technical demonstration only. It must not be presented as an AWAM result, an approved LCIA study, or evidence for an external decision. The scientific choices remain explicitly proposed until the AWAM owner and reviewer approve a real pilot definition and data route.
-
+Each standalone HTML is offline-readable without JavaScript. File downloads and variant switching work when the full package is retained. SHA-256 fingerprints cover the listed HTML/diagnostic artifacts and canonical calculation inputs/results. They do not establish scientific validation or institutional acceptance.

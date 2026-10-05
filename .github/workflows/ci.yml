@@ -34,7 +34,7 @@ jobs:
         run: git diff --check
 
       - name: Compile application and tests
-        run: python -m compileall -q app tests
+        run: python -m compileall -q app tests tools
 
       - name: Run offline test suite
         run: python -m unittest discover -s tests -v
@@ -45,6 +45,24 @@ jobs:
       - name: Build both self-contained report previews
         run: python tools/build_report_previews.py --package /tmp/awam-demo
 
+      - name: Recalculate source and verify review-package fingerprints
+        run: python tools/verify_review_package.py --package /tmp/awam-demo
+
+      - name: Bundle review exports with source revision
+        if: matrix.python-version == '3.12'
+        run: python tools/package_review.py --package /tmp/awam-demo --source-ref '${{ github.sha }}' --out /tmp/technical-review-package.zip
+
+      - name: Retain technical review package
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v7
+        with:
+          name: technical-review-package
+          path: |
+            /tmp/technical-review-package.zip
+            /tmp/technical-review-package.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Verify synthetic package has required artifacts
         run: |
           test -s /tmp/awam-demo/index.html
@@ -54,6 +72,7 @@ jobs:
           test -s /tmp/awam-demo/customer/index.html
           test -s /tmp/awam-demo/reviewer/index.html
           test -s /tmp/awam-demo/preview-manifest.json
+          test -s /tmp/awam-demo/review-diagnostics.json
 
       - name: Verify production approval gate remains fail-closed
         shell: bash
@@ -91,6 +110,9 @@ jobs:
         run: |
           for attempt in {1..20}; do
             if curl --fail --silent http://127.0.0.1:8765/ | grep -q 'Synthetic demonstration'; then
+              curl --fail --silent http://127.0.0.1:8765/reviewer/ | grep -q 'Credit exclusion'
+              curl --fail --silent http://127.0.0.1:8765/customer/ | grep -q 'Study brief'
+              curl --fail --silent http://127.0.0.1:8765/review-diagnostics.json | grep -q 'order_check'
               exit 0
             fi
             sleep 1
@@ -127,6 +149,8 @@ jobs:
         run: |
           python -m app.cli demo --out _site
           python tools/build_report_previews.py --package _site
+          python tools/verify_review_package.py --package _site
+          python tools/package_review.py --package _site --source-ref '${{ github.sha }}' --out _site/technical-review-package.zip
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

@@ -27,3 +27,15 @@ Access date for all web sources below: **2026-09-29**.
 
 `S-01`–`S-18` are sources for the research brief, not proof that Mara requested a particular pilot. The exact pilot and internal AWAM workflow remain reported interview context or unresolved until Mara confirms them. No number in the synthetic demo is sourced from these pages.
 
+
+## Reviewer-context update — 5 October 2026
+
+| ID | Primary source | Use in this package |
+|---|---|---|
+| S-19 | [Fraunhofer Portugal governance](https://www.fraunhofer.pt/en/about/governance-boards.html) | Mara Silva's senior-scientist role and AWAM section presidency; professional identity only. |
+| S-20 | [ORCID 0000-0003-2765-3987](https://orcid.org/0000-0003-2765-3987) | Self-asserted employment/education; older biography noted. |
+| S-21 | [SETAC 2026 programme](https://www.setac.org/static/66e406ee-b1ba-46b8-a8f165c4cbf438ad/Full-Maastricht-Programme-Book.pdf) | Public winery-by-product LCA presentation. |
+| S-22 | [Silva et al., Recycling 2026, 11(9), 155](https://www.mdpi.com/2313-4321/11/9/155) | Functional-unit and process-energy/sensitivity review context; no data imported. |
+| S-23 | [GitHub upload-artifact documentation](https://github.com/actions/upload-artifact) | Official `v7` artifact upload syntax and retention settings. |
+
+S-03's official AWAM LCA sheet was also rechecked. See [reviewer context](docs/reviewer-context.md) for the distinction between verified facts and proposed review priorities. The private interview identity and internal requirements are not independently confirmed by these sources. No synthetic result is derived from this research.

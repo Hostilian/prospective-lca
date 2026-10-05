@@ -1,5 +1,7 @@
 # Research brief
 
+Review-context update: 5 October 2026. See [Dr. Mara Silva: public professional context](reviewer-context.md) for verified identity/role/publications and explicitly inferred review priorities. Earlier compatibility research remains dated to its recorded access date; no tool or method version has been approved for the real pilot.
+
 ## Executive finding
 
 The reusable product should be a **local-first prospective-LCA workbench** that manages study definitions, scenarios, evidence, transformations, validation, calculation adapters, comparison, and reviewer-ready exports around AWAM’s established LCA workflow. The first technical milestone can be delivered without licensed data. The first real scientific milestone cannot be completed until AWAM confirms the pilot process and modelling choices.
@@ -82,4 +84,3 @@ The offline vertical slice uses only the left adapter. It is useful now because 
 ## Source register
 
 See [`SOURCE_REGISTER.md`](../SOURCE_REGISTER.md) for URLs, access dates, evidence classes, and claims.
-

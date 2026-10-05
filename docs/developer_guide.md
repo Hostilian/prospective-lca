@@ -6,6 +6,8 @@
 python3 -m compileall -q app
 python3 -m unittest discover -s tests -v
 python3 -m app.cli demo --out exports/dev-demo
+python3 tools/build_report_previews.py --package exports/dev-demo
+python3 tools/verify_review_package.py --package exports/dev-demo
 ```
 
 The runtime package uses the Python standard library in Phase 1. If an optional dependency is added, pin it, record its licence, add an offline test path, and update `THIRD_PARTY_NOTICES.md`.

@@ -1,34 +1,28 @@
-# Handover checklist
+# Review and handover checklist
 
-## Delivered now
+Review edition 1.1 · 5 October 2026
 
-- [x] Offline project schema and sample project.
-- [x] Scenario matrix: baseline plus four future year/pathway combinations.
-- [x] Explicit assumption ledger and transformation diffs.
-- [x] Unit and structural validation.
-- [x] Production approval gate.
-- [x] Deterministic synthetic calculation.
-- [x] Foreground/background and stage contribution totals.
-- [x] HTML report/dashboard.
-- [x] CSV/JSON exports.
-- [x] Run manifest and hashes.
-- [x] openLCA probe boundary.
-- [x] premise/Brightway readiness boundary.
-- [x] Research brief, source register, method/governance docs, questions, developer/user guides.
-- [x] Offline tests and CI configuration.
+## Completed software package
 
-## Not scientifically validated yet
+- [x] Fixed synthetic project and five scenario cases.
+- [x] Unit/structure/provenance/temporal validation and production gate.
+- [x] Deterministic calculation, transformation diffs and stage/layer contributions.
+- [x] Original HTML/CSV/JSON exports and calculation manifest.
+- [x] Study brief and technical report with preserved supplied values and disclosed rounding.
+- [x] Credit-exclusion and reverse-order checks with machine-readable diagnostics.
+- [x] Source recalculation and document fingerprint verification; tamper-rejection tests.
+- [x] Container serves the same review routes.
+- [x] Technical review guide, evidence-backed reviewer context and focused pilot decision sheet.
+- [x] Automated tests, Docker smoke test and GitHub Pages deployment workflow.
 
-- [ ] Real AWAM process selected.
-- [ ] Functional unit and boundary approved.
-- [ ] openLCA version/database/system model/method approved.
-- [ ] Premise/Brightway route approved, if wanted.
-- [ ] Licensed-data and internal-tool arrangement confirmed.
-- [ ] Real calculation reconciled to openLCA.
-- [ ] Named independent reviewer and acceptance test confirmed.
-- [ ] Paid/formal student arrangement, IP, confidentiality, and publication rules confirmed.
+## Scientific acceptance still required
 
-## Smallest next real-pilot task
+- [ ] Approve the decision, treatment service, FU/reference flow, boundary and counterfactual.
+- [ ] Supply and reconcile measured material/energy balances and output quality.
+- [ ] Approve database/system model, LCIA method and data-access route.
+- [ ] Execute and independently reconcile an approved openLCA baseline.
+- [ ] Approve two future cases, credit/allocation basis and sensitivities.
+- [ ] Record uncertainty limits, numerical tolerances and reviewer acceptance.
+- [ ] Resolve licence/IP, data location, collaboration and permitted claims.
 
-Mara supplies one approved reference model and one small test export. Eren adds the descriptor and mapping, reproduces the baseline, and delivers one future-year/pathway comparison with an assumption ledger and review package. Keep the first milestone bounded; do not promise a full platform before this passes review.
-
+This checklist records package delivery. It does not certify AWAM acceptance or scientific completion.

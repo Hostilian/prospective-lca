@@ -1,131 +1,62 @@
-# AWAM Prospective LCA Workbench
+# Prospective LCA workbench
 
-A local-first, auditable companion for prospective life-cycle assessment work. It is designed to sit around established tools such as openLCA, ecoinvent, Brightway, and premise rather than replace them.
+Independent prototype prepared by Eren Ozturk for technical discussion with Fraunhofer Portugal AWAM. The review package demonstrates scenario transformations, an assumption ledger and reproducible exports around a fixed synthetic grape-pomace example.
 
-**Review the prototype:** [Customer methodology preview](https://hostilian.github.io/prospective-lca/customer/) · [Methods-review preview](https://hostilian.github.io/prospective-lca/reviewer/) · [Original calculation report](https://hostilian.github.io/prospective-lca/report.html) · [Reviewer brief](docs/reviewer_brief.md) · [CI and Docker verification](https://github.com/Hostilian/prospective-lca/actions/workflows/ci.yml)
+**Start here:** [Technical report](https://hostilian.github.io/prospective-lca/reviewer/) · [Study brief](https://hostilian.github.io/prospective-lca/customer/) · [Technical review guide](docs/technical-review.md) · [Download review package](https://hostilian.github.io/prospective-lca/technical-review-package.zip) · [Automated checks](https://github.com/Hostilian/prospective-lca/actions/workflows/ci.yml)
 
-This is a discussion prototype for Fraunhofer Portugal AWAM. Its winery example and impact factors are synthetic. It is ready to demonstrate the workflow, but no real AWAM model has been connected or scientifically validated.
+The software review package is ready for inspection. Scientific acceptance remains open: no AWAM inventory, licensed database, approved LCIA calculation or real prospective background has been connected. The numerical example is synthetic and cannot support investment, technology-ranking or environmental-performance claims.
 
-For a quick review, open the demo, inspect its scenario comparison and assumption ledger, then read [the questions for a real pilot](docs/mara_requirements_questions.md) and [the known limitations](KNOWN_LIMITATIONS.md).
+## Review in ten minutes
 
-The repository currently contains a complete offline vertical slice:
+1. Read the scope and interpretation limits in the technical report.
+2. Inspect the scenario transformations, signed fertiliser credit, credit-exclusion check and order-dependent quantity/factor decomposition.
+3. Use the audit appendix to reconcile the exact supplied display values with the full-precision calculation exports.
+4. Follow the [review guide](docs/technical-review.md) through the code, tests and package verification. Record findings against the [pilot acceptance gates](docs/mara_requirements_questions.md).
 
-- a typed, serializable project model;
-- explicit scientific choices and approval states;
-- scenario/year/pathway separation;
-- reviewable foreground/background transformations;
-- unit checks for the synthetic inventory;
-- validation that blocks production-labelled runs with unresolved choices;
-- deterministic synthetic calculations with foreground/background and stage contributions;
-- reproducibility fingerprints and run manifests;
-- HTML report/dashboard plus CSV and JSON exports;
-- an openLCA IPC probe boundary;
-- a premise/Brightway readiness boundary that does not import or redistribute licensed data;
-- an offline test suite and a 2-minute demonstration script.
+The [reviewer brief](docs/reviewer_brief.md) sets the requested review scope. The [professional context note](docs/reviewer-context.md) records the public research used to tailor it for Dr. Mara Silva; it does not attribute requirements or approval to her.
 
-The demo is intentionally synthetic. It is not an AWAM result, not an approved LCIA method, and not evidence that any future pathway will occur.
+## Reproduce the package
 
-The two editorial previews present the same synthetic evidence for different readers. They preserve the supplied display totals and original percentages in an appendix, explicitly disclose three-significant-figure rounding and percentage discrepancies, show signed credits, and distinguish an ordered synthetic decomposition from the headline values. Author/contact and customer details remain placeholders. See [the specification and unanswered intake questions](docs/report-preview-specification.md) and [preview QA](docs/report-preview-qa.md).
-
-## Quick start
-
-From the repository root:
+Python 3.11 or later; no runtime packages or database required. From the repository root:
 
 ```bash
-python3 -m app.cli demo --out exports/demo
-python3 tools/build_report_previews.py --package exports/demo
-python3 -m app.cli serve --dir exports/demo
+python -m unittest discover -s tests -v
+python -m app.cli demo --out exports/demo
+python tools/build_report_previews.py --package exports/demo
+python tools/verify_review_package.py --package exports/demo
+python -m app.cli serve --dir exports/demo
 ```
 
-Open `http://127.0.0.1:8765/` in a browser. The generated package contains:
+Open http://127.0.0.1:8765/. On Windows, `py -3` can replace `python`.
 
-```text
-exports/demo/
-  index.html          # self-contained customer methodology preview
-  customer/index.html # customer version, with relative comparison navigation
-  reviewer/index.html # self-contained methods-review version
-  report.html         # original engine calculation report
-  run.json            # machine-readable results and validation
-  manifest.json       # reproducibility metadata and hashes
-  results.csv
-  contributions.csv
-  assumptions.csv
-  preview-manifest.json # separate preview-data / HTML fingerprints and decomposition
-```
+| Export | Purpose |
+|---|---|
+| `index.html`, `customer/index.html` | Self-contained study brief |
+| `reviewer/index.html` | Self-contained technical report and arithmetic diagnostics |
+| `report.html` | Original engine report, retained for reconciliation |
+| `run.json`, `manifest.json` | Full-precision calculation, validation, provenance and fingerprints |
+| `results.csv`, `contributions.csv`, `assumptions.csv` | Tabular review exports |
+| `review-diagnostics.json` | Credit-exclusion and reverse-order checks |
+| `preview-manifest.json` | Display-data, HTML and diagnostic fingerprints |
 
-### Docker quick start
+The two report routes preserve all supplied totals, percentages and contribution labels in the appendix. Main-table rounding and small percentage discrepancies are disclosed. The downloadable ZIP records its exact source revision and includes file checksums. Core content works offline without JavaScript or external assets. Optional file links require the complete export package.
 
-The same synthetic, offline demo can run in a reproducible container:
+## Container and CI
 
 ```bash
 docker compose up --build
 ```
 
-Open `http://127.0.0.1:8765/`. The container does not include licensed databases, credentials, or confidential AWAM data.
+The container generates and verifies the same report routes before serving them. GitHub Actions tests Python 3.11–3.13, checks the production gate, verifies exports, builds and smoke-tests the container, retains a review artifact, and deploys Pages from `main`. See [deployment notes](docs/deployment.md).
 
-### GitHub Pages and CI
+## Implementation boundary
 
-The repository pipeline is defined in `.github/workflows/ci.yml`. It runs the test suite on Python 3.11–3.13, checks that the production gate remains fail-closed, rejects licensed/database artifacts, builds and smoke-tests Docker, and deploys the generated synthetic report to GitHub Pages from `main`. See [docs/deployment.md](docs/deployment.md).
+Implemented: serializable project/scenario models, unit conversion, validation, deterministic quantity × factor calculations, transformation diffs, stage/layer contributions, exports and package integrity checks.
 
-The Pages build generates both editorial preview routes after the unchanged synthetic engine exports its calculation package. Each preview is one standalone HTML file with inline styles, SVG charts and optional print-button JavaScript. Core content works without JavaScript or external assets; the original engine HTML remains available at `report.html`.
+Interface boundaries: the openLCA adapter performs an HTTP connectivity probe and builds JSON-RPC payloads; it does not identify or calculate an approved model. The premise/Brightway adapter records readiness metadata; it does not generate a future database. They must pass a supervised baseline reconciliation before real use.
 
-## Commands
+## Scientific acceptance and rights
 
-```bash
-# Run the offline synthetic demonstration.
-python3 -m app.cli demo --out exports/demo
+A real pilot requires an approved treatment service and FU, boundary and counterfactual, measured inventory, database/system model and LCIA method, coherent future pathways, justified co-product treatment, and agreed numerical acceptance tolerances. The eight demonstration choices remain proposed. Production validation blocks this synthetic project.
 
-# Validate without calculating. Production mode intentionally blocks the demo.
-python3 -m app.cli validate --mode production
-python3 -m app.cli validate --mode demo
-
-# Run a selected scenario set.
-python3 -m app.cli run --mode demo \
-  --scenarios baseline-2025,central-2030,ambitious-2040 \
-  --out exports/selected
-
-# Probe a locally started openLCA IPC endpoint without sending project data.
-python3 -m app.cli probe-openlca --endpoint http://localhost:8080
-
-# Serve an already exported package.
-python3 -m app.cli serve --dir exports/demo
-```
-
-For Windows PowerShell, use `py -3` in place of `python3`.
-
-## Scientific and governance position
-
-The application treats prospective LCA as a conditional scenario exercise, not an automatic prediction. Goal and scope, functional unit, boundary, modelling type, database/system model, LCIA method, geography, years, pathway assumptions, scale-up, allocation, and external-communication status are explicit decision gates.
-
-The real AWAM pilot must be based on:
-
-1. one approved reference openLCA model;
-2. one functional unit and boundary;
-3. two coherent future years/pathways;
-4. an approved foreground/background data route;
-5. a reviewer-approved assumption ledger;
-6. an independently checked calculation result.
-
-The current demo intentionally leaves these choices `proposed` and uses original synthetic factors. It cannot pass a production validation gate until AWAM’s scientific owner resolves and approves them.
-
-## Repository map
-
-```text
-app/
-  domain/                 Serializable models and units
-  services/               Validation, calculation, hashing, manifests
-  adapters/               Synthetic, openLCA probe, premise/Brightway boundary
-  reporting/              CSV and self-contained HTML exports
-  ui/                     Local static server
-demo/sample_project/      Original synthetic project definition
-docs/                     Research, method, governance, questions, handover
-tests/                    Offline unit, integration, contract, and end-to-end tests
-```
-
-## What is deliberately not included
-
-No ecoinvent files, `.zolca` database, EcoSpold data, AWAM confidential data, credentials, external API keys, or real project results are present. Any future integration must respect AWAM’s data location, ecoinvent licensing, openLCA version, database/system model, and internal review process.
-
-## Current status
-
-This is a technically working Phase 1 offline vertical slice. The openLCA and prospective-background phases are intentionally gated until Mara/AWAM supplies the real pilot definition and approves the data/calculation route. See [docs/handover_checklist.md](docs/handover_checklist.md), [docs/mara_requirements_questions.md](docs/mara_requirements_questions.md), and [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
+[Known limitations](KNOWN_LIMITATIONS.md) distinguish software checks from scientific evidence. No licensed inventory, credentials or confidential AWAM files are included. Copyright, software licence and institutional IP terms remain unresolved under the [internal-use notice](LICENSE-or-INTERNAL-USE-NOTICE.md); public visibility does not constitute AWAM endorsement or an open-source licence grant.

@@ -1,22 +1,11 @@
-# Two-minute demonstration script
+# Technical walkthrough
 
-## 0:00–0:20 — Position it correctly
+Audience: an LCA researcher already familiar with the subject. Open the [technical report](https://hostilian.github.io/prospective-lca/reviewer/).
 
-“This is a small synthetic prototype of the reusable prospective-LCA workflow we discussed. It is not an AWAM result and it does not replace openLCA or scientific review.”
+1. **Scope:** one synthetic tonne of wet pomace, no measured outputs or agreed counterfactual. State that the task is to review workflow suitability.
+2. **Scenario trace:** choose central 2030. Follow quantity changes and supply factors to the full-precision calculation and displayed comparison. Show the rounding reconciliation.
+3. **Method dependence:** show the signed fertiliser contribution, credit exclusion and reverse-order decomposition. Explain the changed denominator and interaction term.
+4. **Evidence trail:** inspect the proposed ledger, transformation records, run data and manifest. Run package verification; distinguish fingerprints from scientific approval.
+5. **Pilot:** agree one reference model and two future cases. Set baseline reconciliation tolerances and name the evidence/model/review owners before integration.
 
-## 0:20–0:45 — Show the scenario matrix
-
-“The same reference case is compared with four conditional combinations: conservative and central 2030, and conservative and ambitious 2040. A scenario is not just a year: it has a pathway, geography, foreground ID, background ID, narrative, and explicit transformations.”
-
-## 0:45–1:10 — Show the ledger and validation
-
-“Every change is visible in the assumption ledger. The validator checks missing scope fields, units, provenance, temporal consistency, and approval state. If I label this synthetic project as production, it is blocked because the assumptions are only proposed.”
-
-## 1:10–1:35 — Show results and manifest
-
-“The report separates impact proxies by scenario, stage, and foreground/background layer. The manifest fingerprints the input, assumptions, and results so a later run can show what changed.”
-
-## 1:35–2:00 — Ask for the real pilot
-
-“To connect this to AWAM, I need one approved process, functional unit, boundary, openLCA version/database/method, two coherent future pathways, and one acceptance test. I would then implement the openLCA adapter against a safe local test database and reconcile one baseline before expanding.”
-
+Do not spend the meeting defining standard LCA terms. Do not present the synthetic reductions as findings or the connectivity probe as an openLCA calculation.

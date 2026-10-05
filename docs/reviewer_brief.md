@@ -1,41 +1,30 @@
-# Prospective LCA workbench — prototype review brief
+# Prospective LCA workbench: review brief
 
-**Prepared by:** Eren Ozturk  
-**Status:** technical prototype for discussion with Fraunhofer Portugal AWAM  
-**Live demonstration:** https://hostilian.github.io/prospective-lca/
+Prepared by Eren Ozturk · 5 October 2026 · Review document edition 1.1
 
-## Purpose
+Independent prototype for technical discussion with Fraunhofer Portugal AWAM. Requested review: whether the scenario and evidence workflow is a suitable basis for one supervised pilot.
 
-The prototype explores a reusable workflow for comparing a reference life-cycle assessment with conditional future scenarios. It keeps study choices, scenario changes, evidence, validation findings, and output fingerprints together so a researcher can review how each comparison was produced. It is intended to complement an approved LCA calculation workflow, not replace scientific modelling or openLCA.
+[Technical report](https://hostilian.github.io/prospective-lca/reviewer/) · [Study brief](https://hostilian.github.io/prospective-lca/customer/) · [Code and verification guide](technical-review.md)
 
-## What can be reviewed now
+## Reviewable now
 
-- A synthetic reference case and four year/pathway combinations for 2030 and 2040.
-- An assumption ledger that shows the foreground and background changes behind each scenario.
-- Checks for missing scope, provenance, units, temporal consistency, and scientific approval state. A synthetic project cannot be labelled as a production run.
-- A reproducible report with stage contributions, scenario comparisons, CSV/JSON exports, and a run manifest.
-- Offline tests, a Docker smoke test, and an automated GitHub Pages deployment.
+One synthetic reference inventory and four future year/pathway cases. The package exposes transformed quantities and factors, an eight-entry proposed assumption ledger, stage contributions, signed credits and full-precision exports. The technical report adds credit exclusion and a reverse-order decomposition to show how methodological choices affect interpretation.
 
-The example process and impact factors are original illustrations. The displayed numbers are **not AWAM results, validated LCIA, forecasts, or evidence that one pathway is preferable**.
+The figures demonstrate bookkeeping and reproducibility. They are not AWAM results, validated LCIA or projections of Portuguese supplying systems. A lower proxy total does not establish functional equivalence, feasibility or environmental preference.
 
-## Five-minute review
+## Review questions
 
-1. Open the [live synthetic demonstration](https://hostilian.github.io/prospective-lca/) and read the banner and scope.
-2. Compare the baseline with a future scenario and inspect the assumption ledger and validation findings.
-3. Download the [run data](https://hostilian.github.io/prospective-lca/run.json) and [manifest](https://hostilian.github.io/prospective-lca/manifest.json) to see the review trail.
-4. Check the [repository](https://github.com/Hostilian/prospective-lca), [automated checks](https://github.com/Hostilian/prospective-lca/actions/workflows/ci.yml), and [known limitations](../KNOWN_LIMITATIONS.md).
+1. Does the model keep reference flow, treatment service, boundary, counterfactual and co-product treatment sufficiently visible?
+2. Can a researcher trace each scenario from the source quantity/factor through its transformation and contribution to the exported comparison?
+3. Are credits, quantity/factor interaction and numerical presentation differences explicit enough for review?
+4. Which approved reference model, calculation route and numerical tolerances should define the first pilot acceptance test?
 
-## Proposed first supervised pilot
+## Software boundary
 
-Choose **one** AWAM-approved process and reference model. Agree its decision question, functional unit, reference flow, boundary, modelling type, geography, openLCA/database/system-model versions, LCIA method, and data-access rules. First reproduce the baseline through an approved local calculation route and reconcile it with the reference result. Only then add two reviewed future pathways and produce a comparison and assumption ledger.
+The offline synthetic calculation and exports work. The openLCA adapter currently probes connectivity and constructs payloads; it does not execute or reconcile a real model. The premise/Brightway adapter is a readiness boundary. Production validation blocks the synthetic project and proposed critical choices. Recorded approval states are metadata, not authenticated institutional sign-off.
 
-The acceptance test and acceptable numerical differences should be set by AWAM's scientific owner before that work begins. The prototype currently has an openLCA connection probe and adapter boundary; it does **not** run a real openLCA calculation or generate a premise background database.
+## Proposed first pilot
 
-## Decisions requested from AWAM
+Select one approved model and decision question. Record FU/reference flow, moisture and outputs, boundary/counterfactual, allocation or substitution rule, software/database/system-model/LCIA versions and permitted data location. Reproduce the baseline through the approved local route; a second researcher reconciles results against tolerances set beforehand. Only then add two coherent future cases and review sensitivities.
 
-1. Which process and decision should be the pilot? Does “Project LIFE” refer to a named EU LIFE project or to prospective assessment over a project's life?
-2. Which model, method, target years, and future pathways are approved?
-3. Who can provide a safe test model, review assumptions, and define the acceptance test?
-4. What are the permitted data location, confidentiality, IP, publication, and formal collaboration terms?
-
-The detailed [scoping questions](mara_requirements_questions.md) and [handover checklist](handover_checklist.md) support that discussion. No licensed database or confidential AWAM file is included in this public prototype.
+Deliver the model identifiers, evidence ledger, contributions, exports, fingerprints and discrepancy explanations together. [Pilot decision sheet](mara_requirements_questions.md) · [Handover checklist](handover_checklist.md).

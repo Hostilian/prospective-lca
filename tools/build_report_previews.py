@@ -16,15 +16,17 @@ sys.path.insert(0, str(ROOT))
 
 from app.domain.models import load_project
 from app.services.engine import calculate_scenario
+from tools.review_diagnostics import review_diagnostics
+from tools.verify_review_package import verify_calculation
 
 DATA_PATH = ROOT / "demo" / "report_preview_data.json"
-DATE = "4 October 2026"
-VERSION = "1.0"
+DATE = "5 October 2026"
+VERSION = "1.1"
 CATEGORIES = ["climate_change_kg_co2e", "water_consumption_m3", "cumulative_energy_mj"]
 INDICATORS = ["Climate proxy", "Water proxy", "Primary energy proxy"]
 SECTIONS = [("summary", "Summary"), ("study", "Study & boundary"), ("scenarios", "Scenario conditions"),
             ("results", "Comparisons"), ("contributions", "Baseline contributions"), ("drivers", "Process & background"),
-            ("assumptions", "Assumptions"), ("limitations", "Limitations"), ("next", "Data & next steps"), ("appendix", "Appendix")]
+            ("assumptions", "Assumption ledger"), ("limitations", "Interpretation limits"), ("next", "Pilot acceptance"), ("appendix", "Audit appendix")]
 
 CSS = """
 :root{color-scheme:light dark;--paper:#fcfcfd;--ink:#172331;--muted:#4d5e70;--accent:#174f78;--line:#b9c5cf;--wash:#edf2f6;--bar1:#174f78;--bar2:#536577;--bar3:#a8b7c7;--focus:#9b4700}
@@ -42,7 +44,7 @@ CSS += """
 .boundary .narrow-diagram{display:none}
 @media(prefers-color-scheme:dark){:root{--bar3:#e1e7ef}}
 @media(max-width:520px){.contents{display:none!important}.boundary .narrow-diagram{display:block}header{display:flex;flex-direction:column;align-items:flex-start}header .notice{order:1;margin-top:14px}header .meta{order:2}}
-@media print{:root{--bar3:#72879b}.boundary .narrow-diagram{display:none!important}.boundary .wide-diagram{display:block!important}header{break-after:auto}#study,#scenarios{break-before:page}.chart{max-width:560px}#results .chart{max-width:520px}#results figure,#results .table-wrap{margin:14px 0}.rounding{padding:8px 0;break-inside:avoid}.section-number{break-after:avoid}.transformations th:last-child,.transformations td:last-child{white-space:nowrap}.transformations code{font-size:8pt}}
+@media print{:root{--bar3:#72879b}.boundary .narrow-diagram{display:none!important}.boundary .wide-diagram{display:block!important}header{break-after:auto}#study,#scenarios{break-before:page}.chart{max-width:560px}#results .chart{max-width:520px}#results figure,#results .table-wrap{margin:14px 0}.rounding{padding:8px 0;break-inside:avoid}.section-number{break-after:avoid}.transformations th:last-child,.transformations td:last-child{white-space:nowrap}.transformations code{font-size:8pt}.technical{break-before:auto}.diagnostic-block,#limitations{break-inside:avoid}#next{break-before:page}}
 """
 
 
@@ -138,9 +140,9 @@ def narratives(project, reviewer=False):
     for scenario in project.scenarios[1:]:
         changes = {t.target: t.value for t in scenario.transformations}
         changes_list = [("electricity_grid", "electricity"), ("process_heat", "heat"), ("process_water", "water"), ("enzymes", "enzyme"), ("feedstock_transport", "transport activity")]
-        amounts = [f'{(1-Decimal(str(changes[item+":quantity"])))*100:g}% less {label}' for item, label in changes_list]
+        amounts = [f'{format(((1-Decimal(str(changes[item+":quantity"])))*100).normalize(), "f")}% less {label}' for item, label in changes_list]
         credit = (Decimal(str(changes["avoided_fertiliser:quantity"])) - 1) * 100
-        body = "; ".join(amounts) + f"; {credit:g}% larger assumed fertiliser credit."
+        body = "; ".join(amounts) + f'; {format(credit.normalize(), "f")}% larger assumed fertiliser credit.'
         factor = changes["electricity_grid:climate_change_kg_co2e"]
         water = changes["electricity_grid:water_consumption_m3"]
         background = f"Electricity climate factor changes to {factor:g} kg CO2e/kWh; its water factor changes to {water:g} m3/kWh."
@@ -160,26 +162,26 @@ def assumption_ledger(project):
         ("Process scale-up", "Use simple multipliers for process quantities. Replace these with engineering evidence, scale and yield assumptions."),
         ("Fertiliser credit", "Subtract an assumed avoided mineral-fertiliser burden. Confirm the displaced product, nutrient equivalence and co-product treatment."),
         ("Impact indicators", "Use original illustrative climate, water-use and primary-energy proxies. Select an approved life-cycle impact assessment method for the pilot.")]
-    parts = []
+    rows = []
     for choice, (title, statement) in zip(project.choices, statements):
-        parts.append(f'<li><h3>{title}<span class="status">{esc(choice.status.value.title())}</span></h3><p>{statement}</p><p class="note">Responsible owner: to confirm. Source: {esc(choice.source)}. Recorded by: {esc(choice.author)}; this does not indicate approval.</p></li>')
-    return '<ol class="assumption-list">' + "".join(parts) + "</ol>"
+        rows.append(("", [f'<strong>{title}</strong><br><span class="status">{esc(choice.status.value.title())}</span>', statement]))
+    sources = "; ".join(dict.fromkeys(esc(c.source) for c in project.choices))
+    authors = "; ".join(dict.fromkeys(esc(c.author) for c in project.choices))
+    return table(["Choice / status", "Recorded basis and pilot requirement"], rows, cls="ledger") + f'<p class="note">Common evidence: {sources}. Recorded by: {authors}. No scientific owner or approval is recorded. Original identifiers and transformations follow in the audit appendix.</p>'
+
+
+def diagnostic_tables(project):
+    diagnostics = review_diagnostics(project)
+    labels = {s.id: esc(s.name.replace(" pathway", "")) for s in project.scenarios}
+    credit_rows = [("", [labels[r["scenario_id"]], f'{r["net"]:.4f}', f'{r["signed_credit"]:.4f}',
+                        f'{r["zero_credit"]:.4f}', f'{r["zero_credit_change_percent"]:.2f}%'])
+                   for r in diagnostics["credit_stress"]]
+    order_rows = [("", [labels[r["scenario_id"]], f'{r["factor_first"]:.4f}', f'{r["quantity_after_factor"]:.4f}',
+                       f'{r["interaction"]:.4f}']) for r in diagnostics["order_check"]]
+    return f'''<div class="diagnostic-block"><h3>Credit exclusion</h3><p>Remove the signed fertiliser contribution from every case, including the reference. This arithmetic stress check leaves all other inputs fixed. It does not model an alternative pomace treatment or validate substitution.</p>{table(["Case", "Net", "Signed credit", "Zero credit", "Change vs zero-credit reference"], credit_rows, caption="Climate proxy · kg CO2e per tonne; percentages use the zero-credit reference", cls="diagnostic")}<p class="note">Zero credit = net − signed credit. The headline results remain unchanged. Full-precision net, half-credit and zero-credit values are included in review-diagnostics.json; 0%, 50% and 100% credit are diagnostic settings, not evidence-based ranges or probabilities.</p></div><div class="diagnostic-block"><h3>Order and interaction</h3><p>The main decomposition changes process quantities first. Reversing the order gives the split below, with the same combined total.</p>{table(["Case", "Factor first", "Quantity after factor", "Interaction"], order_rows, caption="Reverse-order climate-proxy changes · kg CO2e per tonne", cls="diagnostic")}<p class="note">Interaction = combined − quantity-only − factor-only + reference. The two sequential steps sum to combined − reference in either order. Neither split establishes a unique causal attribution.</p></div>'''
 
 
 def appendix(data, project, run, manifest, data_hash, reviewer):
-    glossary = [
-        ("Life-cycle assessment (LCA)", "An assessment of environmental burdens across the defined stages of a product or process."),
-        ("Prospective", "Conditional future cases. They are neither forecasts nor probabilities."),
-        ("Functional unit (FU)", "The common reference used to compare cases; here, one tonne of wet pomace processed."),
-        ("Foreground", "Process quantities and operating choices."), ("Background", "Supplying systems and the factors used for their burdens."),
-        ("Proxy", "A demonstration indicator used in place of an approved assessment."),
-        ("Life-cycle impact assessment (LCIA)", "Converting inventory flows into indicators with a specified method."),
-        ("Credit", "A modelled subtraction for an avoided activity. It needs evidence and an agreed comparison."),
-        ("Counterfactual", "What would happen without the proposed process, including the current pomace treatment."),
-        ("CO2e", "Carbon dioxide equivalent, the unit used here for the illustrative climate indicator."),
-        ("kWh / MJ / m3", "Kilowatt-hours / megajoules / cubic metres."),
-        ("Allocation", "Rules for assigning burdens to multiple products or functions.")]
-    terms = '<dl class="glossary">' + "".join(f"<dt>{t}</dt><dd>{d}</dd>" for t, d in glossary) + "</dl>"
     exact = table(["Synthetic case", "Climate (kg CO2e)", "Water (m3)", "Energy (MJ)"],
                   [("", [esc(row["label"])] + row["totals"]) for row in data["scenarios"]], caption="Exact supplied totals · per tonne of wet pomace")
     reconciliation = []
@@ -201,7 +203,8 @@ def appendix(data, project, run, manifest, data_hash, reviewer):
     transforms = "".join(table(["Input target", "Transformation", "Source", "Status"],
         [("", row[1][1:]) for row in transform_rows if row[1][0] == esc(s.name)],
         caption=f"Original transformations · {esc(s.name)}", cls="transformations") for s in project.scenarios[1:])
-    return f"""<h3>Plain-language glossary</h3>{terms}
+    terms = '<p>Notation: q = activity quantity; f = synthetic burden factor; I = Σ(q × f), including signed credits. Future cases are conditional assumptions. FU, LCIA, foreground/background and allocation retain their standard LCA meanings; the demonstration does not establish functional equivalence between real treatment systems.</p>'
+    return f"""<h3>Notation</h3>{terms}
 <div class="technical"><h3>Exact figures and rounding</h3><p>The main table uses three significant figures, rounded to nearest with ties away from zero: for example, 221.2 becomes 221, 166.5 becomes 167, 1.800 becomes 1.80 and 2363 becomes 2360. No source value is replaced. The chart uses two-decimal percentages computed from the exact supplied display totals below.</p>{exact}
 <p class="note">Change = (future total − reference total) ÷ reference total × 100. The supplied percentages appear to have used finer source precision; that is an inference from the repository's calculation output, not a change to the supplied dataset. Differences below compare the unrounded recomputation with the supplied percentage, in percentage points.</p>{recon}
 <p>Exact supplied contribution labels: {"; ".join(esc(x["label"]) + " " + x["value"] for x in data["baseline_climate_contributions"])} kg CO2e per tonne. Their arithmetic sum is <strong>221.18084</strong>; the brief reports the rounded sum as <strong>221.18</strong> and the headline total as <strong>221.2</strong>.</p>
@@ -210,24 +213,24 @@ def appendix(data, project, run, manifest, data_hash, reviewer):
 <p>The calculation fingerprints refer to the repository run, including its full-precision results. They do not certify the rounded display dataset or these HTML documents. A separate preview manifest records each HTML file's SHA-256 fingerprint. Licensed data included: <strong>{str(manifest["database"]["licensed_data_included"]).lower()}</strong>.</p>
 <p>Automated consistency checks only, not scientific verification: {validation["error_count"]} errors and {validation["warning_count"]} warnings in demonstration mode. All eight scientific ledger choices remain proposed. No scientist approval, independent verification, critical review or ISO compliance is claimed.</p>
 <h3>Evidence register</h3><ul><li>Preview display totals, percentages and contributions: supplied customer-report brief.</li><li>Process quantities, factors and scenario multipliers: original synthetic project definition, <code>demo/sample_project/project.json</code>.</li><li>Assumption statements and statuses: Synthetic demonstration design note, as recorded in that project file.</li><li>Decomposition: calculated here from those existing synthetic transformations, process quantities first and factors second.</li></ul>
-<p class="assumption">[ASSUMPTION] English, no supplied branding, customer identity and decision unspecified. Customer version explains terms for a new reader; methods version assumes a technical reviewer. Scientific owner and author/contact details remain to be confirmed.</p>
+<p class="assumption">Audience: LCA and process researchers. Prepared by Eren Ozturk for technical discussion with Fraunhofer Portugal AWAM. This independent prototype has no recorded AWAM approval. A real pilot, scientific owner and external communication basis remain unresolved.</p>
 <h3>Transformation detail</h3>{transforms}</div>"""
 
 
 def render(data, project, run, manifest, mode, data_hash, root=False):
     reviewer = mode == "reviewer"
-    name = "Methods review" if reviewer else "Customer report"
-    other = "Customer report" if reviewer else "Methods review"
+    name = "Technical review" if reviewer else "Study brief"
+    other = "Study brief" if reviewer else "Technical review"
     target = "customer/index.html" if reviewer else "reviewer/index.html"
     other_href = target if root else "../" + target
     toc = "".join(f'<li><a href="#{key}"><span>{i:02d}</span>{label}</a></li>' for i, (key, label) in enumerate(SECTIONS, 1))
-    title = "Grape pomace: methods & evidence review" if reviewer else "Grape pomace: a prospective study preview"
-    summary = "This document shows how a prospective life-cycle assessment (LCA) could compare grape-pomace processing in Portugal in 2025, 2030 and 2040. The numbers are synthetic placeholders and use illustrative proxies, rather than an approved life-cycle impact assessment (LCIA) method. A customer-specific study needs measured process data, an agreed comparison and reviewed modelling choices before it can inform a decision."
+    title = "Grape pomace: technical review" if reviewer else "Grape pomace: prospective assessment"
+    summary = "A reproducible workbench demonstration for prospective life-cycle assessment (LCA): one 2025 reference and four conditional process/supply cases for 2030 and 2040. The review concerns scenario bookkeeping, calculation traceability and the transition to an approved pilot. All inventory data and burden factors are synthetic; climate, water-use and primary-energy totals are proxies, not results from an approved life-cycle impact assessment (LCIA) method."
     total_rows = [((' class="baseline"' if i == 0 else ""), [esc(row["label"])] + [sig3(x) for x in row["totals"]]) for i, row in enumerate(data["scenarios"])]
     totals = table(["Synthetic case", "Climate proxy<br>(kg CO2e)", "Water proxy<br>(m3)", "Primary energy proxy<br>(MJ)"], total_rows, caption="Illustrative totals · per tonne of wet pomace", cls="result-table")
     driver_table, _ = decomposition(project, run)
     if reviewer:
-        review_note = '<div class="evidence"><strong>Evidence status</strong><p>One original synthetic inventory; five conditional cases; eight proposed choices. The current pomace treatment, product yields, customer decision, real database and approved impact method are unresolved.</p></div>'
+        review_note = '<div class="evidence"><strong>Review scope</strong><p>Inspect the reference flow and missing counterfactual; separate quantity changes from supply-factor changes; test credit dependence and decomposition order; then check source records, fingerprints and pilot acceptance. The openLCA connection probe and prospective-background metadata are interface boundaries; neither executes a real LCA model.</p></div>'
     else:
         review_note = ""
     sections = {
@@ -237,16 +240,22 @@ def render(data, project, run, manifest, mode, data_hash, root=False):
         "results": f'''<p>Read each change against the same 2025 reference and the conditions above. Lower proxy totals in this demonstration do not establish technology feasibility or an environmental advantage for a real plant.</p><div class="legend"><span><i class="swatch" aria-hidden="true"></i>Climate proxy</span><span><i class="swatch water" aria-hidden="true"></i>Water proxy</span><span><i class="swatch energy" aria-hidden="true"></i>Primary energy proxy</span></div><figure>{change_chart(data)}{change_chart(data, True)}<figcaption>Percentage change from the supplied 2025 totals. Bars extend left from 0%; the three bars in every group follow the legend order. All values use illustrative inputs and proxies.</figcaption></figure>{totals}<p class="note rounding"><strong>Rounding disclosure.</strong> Totals above use three significant figures; chart labels use two decimal places. Supplied percentages and recomputations differ slightly because the display totals are rounded. Exact supplied figures, original percentages and the arithmetic comparison are preserved in the appendix.</p>''',
         "contributions": f'''<p>Electricity is the largest positive climate-proxy contribution in the synthetic reference case. The fertiliser credit is a subtraction that depends on an unconfirmed substitution assumption.</p><figure>{contributions_chart(data)}{contributions_chart(data, True)}<figcaption>Climate proxy · kg CO2e per tonne of wet pomace. Positive burdens extend right of zero; the hatched credit extends left. Water's 0.00084 contribution is labelled exactly and its bar is not exaggerated.</figcaption></figure><p class="note">The six supplied contributions sum to 221.18084; the supplied rounded sum is 221.18 and the supplied headline total is 221.2. The credit reduces the illustrative total but does not demonstrate actual fertiliser displacement.</p>''',
         "drivers": f'''<p><strong>Process changes</strong> alter electricity, heat, water, enzyme, transport and assumed recovery quantities. <strong>Background changes</strong> alter the factors used for electricity supply and, in the ambitious case, heat supply.</p><p>The existing synthetic model allows a separate arithmetic check: change process quantities first while retaining reference factors, then change supply factors. This gives the following climate-proxy decomposition.</p>{driver_table}<p class="note">All columns are derived from the original synthetic model, rounded here to four decimal places for reconciliation. “Process change” = process-only minus reference; “factor change” = combined minus process-only. Their sum equals combined minus reference before rounding. This order assigns the quantity–factor interaction to the factor step; reversing the order changes the split. This is an illustrative causal accounting choice, not scientific validation.</p><p class="note">The table uses full-precision model totals, separate from the fixed supplied display totals. Heat-factor change is included in the final column for the ambitious case. Item labels such as foreground/background in the source inventory are not treated as proof of what caused a reduction.</p><p>For a real decomposition, provide scenario-specific process quantities, yields and uncertainty ranges; matched electricity and heat datasets with provenance, year and geography; and an agreed method for reporting interactions and credits.</p>''',
-        "assumptions": '<p>All eight entries remain proposed. The sentences below clarify the recorded values without changing their source status or inventing approval.</p>' + assumption_ledger(project),
+        "assumptions": '<p>Eight proposed choices; no scientific approval recorded. Each row pairs the demonstration basis with the requirement for a real pilot.</p>' + assumption_ledger(project),
         "limitations": '''<div class="notice"><strong>Synthetic demonstration — not for scientific or external decision-making.</strong><p>Climate, water-use and primary-energy values are illustrative proxies. They are not results from an approved LCIA method.</p></div><ul><li>No confirmed customer goal, measured plant inventory, output mass balance or product quality definition.</li><li>No agreed current-pomace-treatment comparison, allocation rule or evidence of fertiliser substitution.</li><li>No approved inventory database, documented future grid scenario or reviewed impact method.</li><li>No uncertainty analysis, sensitivity ranges or independent data-quality review.</li><li>Software checks test consistency. They do not establish scientific validity, ISO compliance or feasibility.</li></ul><p>A decision study needs these gaps resolved, with an accountable scientific owner reviewing the model, calculations and interpretation. The narrow demonstration boundary cannot support a claim about the complete product life cycle.</p>''',
         "next": '''<p>Start with a short pilot definition, then collect records for the same reference flow. Do not infer missing quantities from these example results.</p><ol class="steps"><li><strong>Agree the question and comparison.</strong><p>Provide the customer name, decision, decision date, current pomace treatment, alternative process and intended products. Confirm moisture, quality and the study boundary.</p></li><li><strong>Supply measured operating records.</strong><p>Electricity and heat demand; heat source; water intake and discharge; enzyme dose; incoming and outgoing mass, moisture and yields; seasonal throughput; transport mass and distance. Give units, measurement dates, source files and uncertainty ranges.</p></li><li><strong>Resolve recovery and substitution.</strong><p>Provide product composition, nutrient equivalence, market/use conditions and evidence of what the recovered output actually displaces. Agree allocation and whether any avoided-burden credit is appropriate.</p></li><li><strong>Choose future conditions and methods.</strong><p>Document process scale-up, engineering changes, background datasets, versions, geographic coverage, years and an approved impact method. Record who owns and reviews each choice.</p></li><li><strong>Review before communicating results.</strong><p>Check mass and energy balances, independently reconcile calculations, test key assumptions and uncertainty, and agree what can be claimed. Fill customer, author and contact details before sharing even this demonstration.</p></li></ol>''',
         "appendix": appendix(data, project, run, manifest, data_hash, reviewer)
     }
+    sections["study"] = sections["study"].replace("This is the functional unit: the same amount is compared in every case.", "Declared demonstration FU. Moisture, treatment service and output specifications are unresolved; mass alone does not prove functional equivalence.")
+    sections["next"] = '''<p>The next scientific milestone is one reconciled baseline and two approved future cases. Accept each gate against a recorded deliverable.</p><ol class="steps"><li><strong>Reference model and comparison</strong><p>Approve the decision question, treatment service, FU, reference flow, moisture, boundary, counterfactual and co-product treatment. Supply a versioned openLCA model and the approved database/system model and LCIA method.</p></li><li><strong>Inventory and process balance</strong><p>Provide measured material flows, yields, electricity and heat demand, water and discharge, transport, operating scale and sampling dates. Reconcile mass and energy balances; distinguish pilot measurements from industrial assumptions.</p></li><li><strong>Future conditions and credit basis</strong><p>Approve two coherent pathways, target years, geography, engineering changes and matched background datasets. Document the displaced product, nutrient equivalence and credit/allocation rule. Agree sensitivity settings and uncertainty treatment.</p></li><li><strong>Calculation acceptance</strong><p>A second researcher reproduces the baseline through the approved calculation route. Record absolute and relative tolerances before comparison; explain residual differences and re-run both future cases from the same model.</p></li><li><strong>Review and handover</strong><p>Deliver inputs, transformation ledger, contributions, sensitivity results, exports and fingerprints together. Record the scientific reviewer, data-access rules, IP terms and permitted claims. Software package integrity and scientific acceptance are separate decisions.</p></li></ol>'''
+    if reviewer:
+        sections["drivers"] += diagnostic_tables(project)
+    download_prefix = "" if root else "../"
+    sections["appendix"] += f'<h3>Review files</h3><p>Within the complete export package: <a href="{download_prefix}run.json">calculation data</a> · <a href="{download_prefix}manifest.json">calculation manifest</a> · <a href="{download_prefix}review-diagnostics.json">review diagnostics</a> · <a href="{download_prefix}preview-manifest.json">document fingerprints</a>. Verify with <code>python tools/verify_review_package.py --package exports/demo</code> from the source repository.</p>'
     labels = dict(SECTIONS)
     body = "".join(f'<section class="section" id="{key}" aria-labelledby="heading-{key}"><span class="section-number">{i:02d}</span><h2 id="heading-{key}">{labels[key]}</h2>{sections[key]}</section>' for i, (key, _) in enumerate(SECTIONS, 1))
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Synthetic grape-pomace methodology preview. Illustrative inputs and proxies; not for scientific or external decision-making."><title>{title} | {name}</title><style>{CSS}</style></head>
-<body class="{mode}"><a class="skip" href="#main">Skip to report</a><nav class="switcher" aria-label="Report versions"><strong>Prospective assessment · methodology preview</strong><a href="#main" aria-current="page">{name}</a><a href="{other_href}">{other}</a><button class="print-button" type="button" id="print-report">Print / save PDF</button></nav><div class="layout"><nav class="contents" aria-label="Report contents"><p>In this document</p><ol>{toc}</ol></nav><main id="main"><header><span class="badge">Illustrative · synthetic inputs</span><div class="eyebrow">{name}</div><h1>{title}</h1><p class="subtitle">Methodology preview and workflow demonstration</p><p class="meta">{DATE} · Document {VERSION}<br>Customer: [Name to confirm] · Author: [Author to confirm]<br>Contact: [Contact to confirm]</p><div class="notice"><strong>Synthetic demonstration — not for scientific or external decision-making.</strong><p>Illustrative climate, water-use and primary-energy proxies; not an approved life-cycle impact assessment method.</p></div></header>{body}<footer>Prepared as a workflow demonstration. Scientific owner and communication approval remain to be confirmed.</footer></main></div><script>document.documentElement.classList.add('js');document.getElementById('print-report').addEventListener('click',function(){{window.print()}});</script></body></html>'''
+<body class="{mode}"><a class="skip" href="#main">Skip to report</a><nav class="switcher" aria-label="Report versions"><strong>Prospective LCA · review package</strong><a href="#main" aria-current="page">{name}</a><a href="{other_href}">{other}</a><button class="print-button" type="button" id="print-report">Print / save PDF</button></nav><div class="layout"><nav class="contents" aria-label="Report contents"><p>In this document</p><ol>{toc}</ol></nav><main id="main"><header><span class="badge">Synthetic case</span><div class="eyebrow">{name}</div><h1>{title}</h1><p class="subtitle">Synthetic case · scenario and evidence review</p><p class="meta">{DATE} · Document {VERSION}<br>Prepared by Eren Ozturk<br>Technical discussion · Fraunhofer Portugal AWAM</p><div class="notice"><strong>Synthetic demonstration — not for scientific or external decision-making.</strong><p>Illustrative climate, water-use and primary-energy proxies; not an approved life-cycle impact assessment method.</p></div></header>{body}<footer>Independent prototype · synthetic data. Scientific approval and the real pilot remain outstanding.</footer></main></div><script>document.documentElement.classList.add('js');document.getElementById('print-report').addEventListener('click',function(){{window.print()}});</script></body></html>'''
 
 
 def build(package):
@@ -259,6 +268,7 @@ def build(package):
     # Refuse to attach source fingerprints to a different project/scenario package.
     if run["project"] != project.to_dict() or manifest["scenario_ids"] != [s.id for s in project.scenarios]:
         raise ValueError("Preview requires the unchanged full synthetic project package")
+    verify_calculation(project, run, manifest)
     output_hashes = {}
     for mode in ["customer", "reviewer"]:
         target = package / mode / "index.html"
@@ -270,11 +280,14 @@ def build(package):
     homepage.write_text(render(data, project, run, manifest, "customer", data_hash, root=True), encoding="utf-8", newline="\n")
     output_hashes["index.html"] = hashlib.sha256(homepage.read_bytes()).hexdigest()
     _, driver_data = decomposition(project, run)
+    diagnostics_path = package / "review-diagnostics.json"
+    diagnostics_path.write_text(json.dumps(review_diagnostics(project), indent=2) + "\n", encoding="utf-8", newline="\n")
     (package / "preview-manifest.json").write_text(json.dumps({"document_version": VERSION, "date": DATE,
         "display_data_sha256": data_hash, "html_sha256": output_hashes, "source_calculation_manifest": "manifest.json",
+        "review_diagnostics_sha256": hashlib.sha256(diagnostics_path.read_bytes()).hexdigest(),
         "decomposition_order": "process quantities first; supplying-system factors second",
         "derived_decomposition": driver_data}, indent=2) + "\n", encoding="utf-8")
-    print("Built customer and methods-review previews; source calculation report retained as report.html")
+    print("Built study brief and technical review; source calculation report retained as report.html")
     for path in output_hashes:
         print(f"{path}: {(package / path).stat().st_size:,} bytes")
 

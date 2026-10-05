@@ -12,6 +12,8 @@ from app.domain.models import load_project
 from app.services.engine import run_project
 from app.services.manifests import build_manifest
 from tools.build_report_previews import build, decomposition, percent, sig3
+from tools.review_diagnostics import review_diagnostics
+from tools.verify_review_package import verify_package
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -34,6 +36,50 @@ class ResourceParser(HTMLParser):
 
 
 class PreviewTests(unittest.TestCase):
+    def test_credit_denominator_and_quantity_factor_interaction(self):
+        project = load_project(ROOT / "demo/sample_project/project.json")
+        diagnostics = review_diagnostics(project)
+        base, central, _, _, ambitious = diagnostics["credit_stress"]
+        # Independent fixed-data checks: subtract the signed credit in BOTH cases.
+        self.assertAlmostEqual(base["zero_credit"], 176.4 + 45 + 14.4 + 2.88 + 0.00084)
+        self.assertAlmostEqual(central["signed_credit"], -70 * 1.2 * 0.25)
+        expected_change = (136.170756 / 238.68084 - 1) * 100
+        self.assertAlmostEqual(central["zero_credit_change_percent"], expected_change)
+        self.assertAlmostEqual(ambitious["zero_credit"], 64.40463)
+        for row in diagnostics["order_check"]:
+            self.assertAlmostEqual(row["quantity_first"] + row["factor_after_quantity"], row["combined"] - row["reference"])
+            self.assertAlmostEqual(row["factor_first"] + row["quantity_after_factor"], row["combined"] - row["reference"])
+        # Central electricity interaction: Δq × Δf = (420×0.82−420)×(0.24−0.42).
+        self.assertAlmostEqual(diagnostics["order_check"][0]["interaction"], (420 * 0.82 - 420) * (0.24 - 0.42))
+
+    def test_package_verification_rejects_modified_calculation_and_document(self):
+        project = load_project(ROOT / "demo/sample_project/project.json")
+        selected = [s.id for s in project.scenarios]
+        run = run_project(project, mode="demo", selected_scenario_ids=selected)
+        manifest = build_manifest(project, run, selected)
+        with tempfile.TemporaryDirectory() as temp:
+            package = Path(temp)
+            run_path = package / "run.json"
+            manifest_path = package / "manifest.json"
+            run_path.write_text(json.dumps(run), encoding="utf-8")
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            build(package)
+            self.assertEqual(verify_package(package)["status"], "passed")
+            document = package / "reviewer/index.html"
+            document.write_text(document.read_text(encoding="utf-8") + "altered", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Artifact fingerprint mismatch"):
+                verify_package(package)
+            build(package)
+            manifest["result_artifact_hash"] = "0" * 64
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "manifest mismatch"):
+                build(package)
+            manifest_path.write_text(json.dumps(build_manifest(project, run, selected)), encoding="utf-8")
+            run["results"][0]["impacts"]["climate_change_kg_co2e"] += 1
+            run_path.write_text(json.dumps(run), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "differs from the reproducible source model"):
+                build(package)
+
     def test_supplied_display_precision_is_preserved_and_discrepancy_disclosed(self):
         data = json.loads((ROOT / "demo/report_preview_data.json").read_text(encoding="utf-8"))
         self.assertEqual(data["scenarios"][3]["totals"][1], "1.800")
